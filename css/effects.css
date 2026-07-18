@@ -1,0 +1,83 @@
+  @keyframes screen-enter { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+  @keyframes slide-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+  /* ── Screen transitions: 3D tilt exit / rise-in entrance ─────────────────── */
+  .screen { will-change: transform, opacity, filter; }
+  .screen.fading-out {
+    animation: screen-exit 0.38s ease forwards;
+  }
+  .screen.fading-in {
+    animation: screen-rise-in 0.5s cubic-bezier(0.22,1,0.36,1) forwards;
+  }
+  @keyframes screen-exit {
+    from { opacity: 1; transform: perspective(900px) rotateX(0deg) translateY(0); filter: blur(0); }
+    to   { opacity: 0; transform: perspective(900px) rotateX(8deg) translateY(-16px); filter: blur(4px); }
+  }
+  @keyframes screen-rise-in {
+    from { opacity: 0; transform: perspective(900px) rotateX(-6deg) translateY(24px); filter: blur(6px); }
+    to   { opacity: 1; transform: perspective(900px) rotateX(0deg) translateY(0); filter: blur(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .screen.fading-out, .screen.fading-in { animation: none; }
+  }
+
+  /* ── Wrong-answer shake ────────────────────────────────────────────────── */
+  .question-card.shake { animation: card-shake 0.2s ease; }
+  @keyframes card-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-3px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .question-card.shake { animation: none; }
+  }
+
+  /* ── Result screen: star pop-in + score pop ──────────────────────────────── */
+  @keyframes star-pop {
+    0%   { opacity: 0; transform: scale(0.3); }
+    60%  { opacity: 1; transform: scale(1.25); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .result-score.score-pop { animation: score-pop-anim 0.4s ease; }
+  @keyframes score-pop-anim {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.18); }
+    100% { transform: scale(1); }
+  }
+
+  /* ── Progress bar sheen ───────────────────────────────────────────────── */
+  @keyframes progress-sheen {
+    0%   { transform: translateX(-120%); }
+    100% { transform: translateX(320%); }
+  }
+
+  /* ── Reduced motion: kill shimmer / tilt / pop-in / sheen ────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .diff-btn, .next-btn, .play-again-btn {
+      transition: none !important;
+      background-position: 0 0, 0 0 !important;
+    }
+    .question-card, .diff-btn {
+      transform: none !important;
+      transition: none !important;
+    }
+    .progress-fill::after { animation: none !important; display: none; }
+    .result-star { animation: none !important; opacity: 1; transform: none; }
+    .result-score.score-pop { animation: none !important; }
+    .toast { transition: opacity 0.2s ease; }
+  }
+
+  /* ── Wand cursor ───────────────────────────────────────────────────────── */
+  @media (pointer: fine) {
+    body {
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cline x1='5' y1='27' x2='25' y2='7' stroke='%234a3520' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='26' cy='6' r='6' fill='%23c9a84c' opacity='0.35'/%3E%3Ccircle cx='26' cy='6' r='3.5' fill='%23f0d080' opacity='0.7'/%3E%3Ccircle cx='26' cy='6' r='1.6' fill='%23fff8e0'/%3E%3C/svg%3E") 26 6, auto;
+    }
+    a, button:not([disabled]) {
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cline x1='5' y1='27' x2='25' y2='7' stroke='%234a3520' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='26' cy='6' r='7' fill='%23f0d080' opacity='0.5'/%3E%3Ccircle cx='26' cy='6' r='4' fill='%23f5e0a0' opacity='0.9'/%3E%3Ccircle cx='26' cy='6' r='2' fill='%23fffdf0'/%3E%3C/svg%3E") 26 6, pointer;
+    }
+  }
