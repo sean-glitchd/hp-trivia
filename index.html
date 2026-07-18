@@ -11,7 +11,14 @@
     --gold-light: #f0d080;
     --parchment: #f5e6c8;
     --deep-purple: #1a0a2e;
+    --accent: var(--gold);
+    --accent-light: var(--gold-light);
+    --accent-glow: rgba(201,168,76,0.5);
   }
+  body[data-house="gryffindor"] { --accent:#d3a625; --accent-light:#f0c75e; --accent-glow:rgba(174,0,1,0.45); }
+  body[data-house="slytherin"]  { --accent:#2ea86e; --accent-light:#7ee8a8; --accent-glow:rgba(42,98,61,0.5); }
+  body[data-house="ravenclaw"]  { --accent:#6c9fd8; --accent-light:#9ec3f0; --accent-glow:rgba(34,71,119,0.5); }
+  body[data-house="hufflepuff"] { --accent:#e3b53d; --accent-light:#f5d576; --accent-glow:rgba(96,86,15,0.5); }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -30,12 +37,12 @@
   .container { position: relative; z-index: 10; max-width: 680px; margin: 0 auto; padding: 40px 20px 80px; }
 
   .header { text-align: center; margin-bottom: 10px; animation: fade-in 1.5s ease forwards; }
-  .header h1 { font-family: 'Cinzel Decorative', cursive; font-size: clamp(1.4rem, 4.5vw, 2.1rem); color: var(--gold); text-shadow: 0 0 30px rgba(201,168,76,0.6), 0 2px 4px rgba(0,0,0,0.8); line-height: 1.3; }
+  .header h1 { font-family: 'Cinzel Decorative', cursive; font-size: clamp(1.4rem, 4.5vw, 2.1rem); color: var(--accent); text-shadow: 0 0 30px var(--accent-glow), 0 2px 4px rgba(0,0,0,0.8); line-height: 1.3; transition: color 0.5s, text-shadow 0.5s; }
   .header p { color: rgba(245,230,200,0.6); font-style: italic; font-size: 0.9rem; margin-top: 8px; letter-spacing: 0.05em; }
 
   .divider { display: flex; align-items: center; gap: 12px; margin: 18px 0; }
-  .divider-line { flex: 1; height: 1px; background: linear-gradient(to right, transparent, var(--gold), transparent); }
-  .divider span { color: var(--gold); font-size: 1.1rem; }
+  .divider-line { flex: 1; height: 1px; background: linear-gradient(to right, transparent, var(--accent), transparent); }
+  .divider span { color: var(--accent); font-size: 1.1rem; }
 
   /* Screen transitions */
   .screen { transition: opacity 0.4s ease, transform 0.4s ease; }
@@ -97,6 +104,13 @@
 
   .diff-grid-single { grid-template-columns: 1fr; margin-bottom: 0; }
 
+  /* House picker */
+  .house-picker-label { font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(245,230,200,0.45); margin-bottom: 10px; }
+  .house-picker { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 26px; }
+  .house-btn { display: flex; align-items: center; gap: 6px; background: rgba(10,5,20,0.85); border: 1px solid rgba(201,168,76,0.22); border-radius: 20px; padding: 7px 14px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.06em; color: rgba(245,230,200,0.6); transition: all 0.25s; }
+  .house-btn:hover { transform: translateY(-2px); border-color: rgba(201,168,76,0.5); color: rgba(245,230,200,0.85); }
+  .house-btn.selected { border-color: var(--accent); color: var(--accent-light); background: rgba(201,168,76,0.08); box-shadow: 0 0 12px var(--accent-glow); }
+
   .unlock-banner {
     background: rgba(201,168,76,0.08);
     border: 1px solid rgba(201,168,76,0.3);
@@ -116,7 +130,7 @@
   .quiz-diff-tag { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; font-family: 'Cinzel', serif; }
 
   .progress-bar { background: rgba(255,255,255,0.08); border-radius: 20px; height: 6px; margin-bottom: 18px; overflow: hidden; border: 1px solid rgba(201,168,76,0.25); }
-  .progress-fill { height: 100%; background: linear-gradient(to right, var(--gold), var(--gold-light)); border-radius: 20px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 0 8px rgba(201,168,76,0.4); }
+  .progress-fill { height: 100%; background: linear-gradient(to right, var(--accent), var(--accent-light)); border-radius: 20px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 0 8px var(--accent-glow); }
 
   .lifeline-bar { display: flex; justify-content: flex-end; margin-bottom: 14px; }
   .ll-btn { display: flex; align-items: center; gap: 7px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.18); border-radius: 8px; padding: 7px 14px; cursor: pointer; font-size: 0.74rem; letter-spacing: 0.08em; color: rgba(245,230,200,0.55); transition: all 0.25s; font-family: 'Cinzel', serif; }
@@ -126,7 +140,7 @@
   .question-card { background: rgba(10,5,20,0.85); border: 1px solid rgba(201,168,76,0.35); border-radius: 16px; padding: 28px; margin-bottom: 14px; box-shadow: 0 8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(201,168,76,0.15); animation: slide-up 0.4s ease forwards; }
   @keyframes slide-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-  .question-number { font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--gold); letter-spacing: 0.2em; margin-bottom: 10px; text-transform: uppercase; }
+  .question-number { font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--accent); letter-spacing: 0.2em; margin-bottom: 10px; text-transform: uppercase; }
   .question-text { font-size: 1.18rem; color: var(--parchment); line-height: 1.65; margin-bottom: 22px; font-weight: 500; }
 
   .options { display: flex; flex-direction: column; gap: 10px; }
@@ -157,25 +171,32 @@
   .fact-label { font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); margin-bottom: 7px; }
   .fact-text { color: rgba(245,230,200,0.8); font-style: italic; font-size: 0.95rem; line-height: 1.65; }
 
-  .next-btn { width: 100%; background: linear-gradient(135deg, rgba(201,168,76,0.08), rgba(201,168,76,0.18)); border: 1px solid var(--gold); border-radius: 10px; padding: 14px 24px; color: var(--gold); font-family: 'Cinzel', serif; font-size: 0.9rem; letter-spacing: 0.1em; cursor: pointer; transition: all 0.3s; animation: fade-in 0.4s ease 0.15s both; }
-  .next-btn:hover { background: linear-gradient(135deg, rgba(201,168,76,0.18), rgba(201,168,76,0.32)); box-shadow: 0 0 20px rgba(201,168,76,0.2); transform: translateY(-2px); }
+  .next-btn { width: 100%; background: linear-gradient(135deg, rgba(201,168,76,0.08), rgba(201,168,76,0.18)); border: 1px solid var(--accent); border-radius: 10px; padding: 14px 24px; color: var(--accent); font-family: 'Cinzel', serif; font-size: 0.9rem; letter-spacing: 0.1em; cursor: pointer; transition: all 0.3s; animation: fade-in 0.4s ease 0.15s both; }
+  .next-btn:hover { background: linear-gradient(135deg, rgba(201,168,76,0.18), rgba(201,168,76,0.32)); box-shadow: 0 0 20px var(--accent-glow); transform: translateY(-2px); }
 
   /* Score bar on result */
   .score-ring { margin: 24px 0 8px; }
-  .result-score { font-family: 'Cinzel Decorative', cursive; font-size: clamp(3.5rem, 12vw, 5.5rem); color: var(--gold); text-shadow: 0 0 40px rgba(201,168,76,0.5); line-height: 1; }
+  .result-score { font-family: 'Cinzel Decorative', cursive; font-size: clamp(3.5rem, 12vw, 5.5rem); color: var(--accent); text-shadow: 0 0 40px var(--accent-glow); line-height: 1; }
   .result-score-sub { font-family: 'Cinzel', serif; font-size: 0.78rem; letter-spacing: 0.2em; color: rgba(245,230,200,0.45); text-transform: uppercase; margin-bottom: 24px; }
 
   .result-card { background: rgba(10,5,20,0.85); border: 1px solid rgba(201,168,76,0.3); border-radius: 16px; padding: 26px; margin-bottom: 18px; animation: fade-in 0.8s ease 0.2s both; }
-  .result-rating { font-family: 'Cinzel Decorative', cursive; font-size: 1.15rem; color: var(--gold-light); margin-bottom: 12px; }
+  .result-rating { font-family: 'Cinzel Decorative', cursive; font-size: 1.15rem; color: var(--accent-light); margin-bottom: 12px; }
   .result-comment { color: rgba(245,230,200,0.8); font-style: italic; font-size: 1.08rem; line-height: 1.7; }
+  .result-house-line { margin-top: 14px; color: var(--accent-light); font-style: italic; font-size: 0.95rem; }
 
   .expert-unlocked-banner { background: rgba(220,60,60,0.08); border: 1px solid rgba(220,60,60,0.35); border-radius: 12px; padding: 18px 22px; margin-bottom: 18px; animation: fade-in 0.8s ease 0.5s both; }
   .expert-unlocked-title { font-family: 'Cinzel', serif; font-size: 0.88rem; letter-spacing: 0.1em; color: #f09090; margin-bottom: 6px; }
   .expert-unlocked-text { color: rgba(245,230,200,0.65); font-size: 0.9rem; font-style: italic; }
 
   .result-btns { display: flex; gap: 10px; animation: fade-in 1s ease 0.7s both; }
-  .play-again-btn { flex: 1; background: linear-gradient(135deg, rgba(201,168,76,0.1), rgba(201,168,76,0.22)); border: 1px solid var(--gold); border-radius: 10px; padding: 13px 20px; color: var(--gold); font-family: 'Cinzel', serif; font-size: 0.88rem; letter-spacing: 0.08em; cursor: pointer; transition: all 0.3s; }
-  .play-again-btn:hover { background: linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.38)); box-shadow: 0 0 18px rgba(201,168,76,0.25); transform: translateY(-2px); }
+  .play-again-btn { flex: 1; background: linear-gradient(135deg, rgba(201,168,76,0.1), rgba(201,168,76,0.22)); border: 1px solid var(--accent); border-radius: 10px; padding: 13px 20px; color: var(--accent); font-family: 'Cinzel', serif; font-size: 0.88rem; letter-spacing: 0.08em; cursor: pointer; transition: all 0.3s; }
+  .play-again-btn:hover { background: linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.38)); box-shadow: 0 0 18px var(--accent-glow); transform: translateY(-2px); }
+
+  /* Sound controls */
+  .sound-controls { position: fixed; top: 14px; right: 14px; z-index: 50; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  .sound-btn { background: rgba(10,5,20,0.85); border: 1px solid rgba(201,168,76,0.35); border-radius: 50%; width: 42px; height: 42px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: all 0.25s; color: var(--accent); }
+  .sound-btn:hover { border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
+  .track-btn { border-radius: 20px; width: auto; height: auto; padding: 6px 12px; font-size: 0.68rem; font-family: 'Cinzel', serif; letter-spacing: 0.06em; }
 
   .confetti-piece { position: fixed; width: 10px; height: 10px; top: -10px; border-radius: 2px; animation: confetti-fall linear forwards; pointer-events: none; z-index: 100; }
   @keyframes confetti-fall { 0% { transform: translateY(0) rotateZ(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotateZ(720deg); opacity: 0; } }
@@ -183,7 +204,10 @@
   @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 
   @media (max-width: 480px) {
-    .container { padding: 28px 14px 60px; }
+    .container { padding: 64px 14px 60px; }
+    .sound-controls { flex-direction: row; top: 10px; right: 10px; }
+    .sound-btn { width: 38px; height: 38px; font-size: 1rem; }
+    .track-btn { width: auto; height: auto; padding: 6px 12px; font-size: 0.68rem; }
     .question-text { font-size: 1.08rem; }
     .option { font-size: 0.95rem; }
     .diff-grid { gap: 8px; }
@@ -192,6 +216,11 @@
 </style>
 </head>
 <body>
+
+<div class="sound-controls">
+  <button id="music-toggle" class="sound-btn" aria-pressed="false" aria-label="Toggle sound" onclick="AudioEngine.toggle()">🔇</button>
+  <button id="track-toggle" class="sound-btn track-btn hidden" aria-label="Switch music track" onclick="AudioEngine.switchTrack()">🎵 Theme</button>
+</div>
 
 <div class="stars" id="stars"></div>
 
@@ -206,6 +235,15 @@
   <!-- Welcome / Difficulty Select -->
   <div id="screen-welcome" class="screen">
     <p class="welcome-text">"Welcome, young scholar. The wizarding world holds many secrets — but how many do you truly know? Choose your level of challenge wisely..."</p>
+
+    <div class="house-picker-label">Declare your allegiance</div>
+    <div class="house-picker" id="house-picker">
+      <button class="house-btn" data-house="gryffindor" onclick="setHouse('gryffindor')">🦁 Gryffindor</button>
+      <button class="house-btn" data-house="slytherin" onclick="setHouse('slytherin')">🐍 Slytherin</button>
+      <button class="house-btn" data-house="ravenclaw" onclick="setHouse('ravenclaw')">🦅 Ravenclaw</button>
+      <button class="house-btn" data-house="hufflepuff" onclick="setHouse('hufflepuff')">🦡 Hufflepuff</button>
+      <button class="house-btn" data-house="" onclick="setHouse(null)">✨ No allegiance</button>
+    </div>
 
     <div class="diff-grid">
       <button class="diff-btn diff-easy" onclick="startQuiz('easy')">
@@ -252,7 +290,7 @@
   <!-- Quiz Screen -->
   <div id="screen-quiz" class="screen hidden">
     <div class="quiz-top">
-      <div class="progress-text" id="progress-text">Question 1 of 10</div>
+      <div class="progress-text" id="progress-text" aria-live="polite">Question 1 of 10</div>
       <div id="quiz-diff-tag"></div>
     </div>
     <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:10%"></div></div>
@@ -265,7 +303,7 @@
       <div class="question-number" id="question-number">Question 1</div>
       <div class="question-text" id="question-text"></div>
       <div class="options" id="options-container"></div>
-      <div id="fact-container"></div>
+      <div id="fact-container" aria-live="polite"></div>
     </div>
 
     <button class="next-btn hidden" id="next-btn" onclick="nextQuestion()">Next Question →</button>
@@ -281,6 +319,7 @@
     <div class="result-card">
       <div class="result-rating" id="result-rating"></div>
       <div class="result-comment" id="result-comment"></div>
+      <div class="result-house-line hidden" id="result-house-line"></div>
     </div>
 
     <div class="expert-unlocked-banner hidden" id="expert-unlocked-banner">
@@ -320,6 +359,18 @@ const allQuestions = [
   { q:"What animal does Professor McGonagall transform into?", options:["A fox","An owl","A tabby cat","A dog"], answer:2, fact:"McGonagall is an Animagus who transforms into a tabby cat. Harry first spots her sitting on the Dursleys' garden wall.", diff:"easy" },
   { q:"What is the name of the sweet shop in Hogsmeade?", options:["Zonko's","The Three Broomsticks","Honeydukes","Madam Puddifoot's"], answer:2, fact:"Honeydukes sells Bertie Bott's Every Flavour Beans, Chocolate Frogs, Exploding Bonbons, and much more besides.", diff:"easy" },
   { q:"What is Harry Potter's best friend with bright red hair called?", options:["Neville","Dean","Ron","Seamus"], answer:2, fact:"Ron Weasley comes from a large wizarding family — six siblings in total — and is fiercely loyal to Harry throughout everything.", diff:"easy" },
+  { q:"Who is the headmaster of Hogwarts when Harry first arrives?", options:["Professor Snape","Albus Dumbledore","Professor McGonagall","Cornelius Fudge"], answer:1, fact:"Albus Dumbledore is widely considered the greatest wizard of his age — and famously fond of sherbet lemons.", diff:"easy" },
+  { q:"Where do young witches and wizards buy their wands in Diagon Alley?", options:["Ollivanders","Flourish and Blotts","Gringotts","Eeylops Owl Emporium"], answer:0, fact:"Ollivanders has been making fine wands since 382 BC. As Mr Ollivander says: the wand chooses the wizard.", diff:"easy" },
+  { q:"What magical object decides which house each student belongs in?", options:["The Goblet of Fire","The Sorting Hat","The Sword of Gryffindor","The Marauder's Map"], answer:1, fact:"The Sorting Hat once belonged to Godric Gryffindor. Each of the four founders enchanted it so it could sort students long after they were gone.", diff:"easy" },
+  { q:"Which subject does Professor Snape teach when Harry starts at Hogwarts?", options:["Defence Against the Dark Arts","Transfiguration","Charms","Potions"], answer:3, fact:"Snape teaches Potions for years, though everyone knows he covets the Defence Against the Dark Arts job — which he finally gets in Harry's sixth year.", diff:"easy" },
+  { q:"What is the name of the Dursleys' son, Harry's cousin?", options:["Piers","Dudley","Vernon","Dennis"], answer:1, fact:"Dudley Dursley spends years bullying Harry, but their final goodbye is surprisingly touching: 'I don't think you're a waste of space.'", diff:"easy" },
+  { q:"What is the name of the wizarding bank in Diagon Alley?", options:["Borgin and Burkes","The Ministry Vault","Gringotts","Galleon & Sons"], answer:2, fact:"Gringotts is run by goblins, and it's said to be the safest place in the world for anything you want to keep hidden — except perhaps Hogwarts.", diff:"easy" },
+  { q:"What is the name of Neville Longbottom's pet toad?", options:["Trevor","Toby","Percy","Wilbur"], answer:0, fact:"Trevor is forever escaping. Neville spends most of his first journey to Hogwarts searching the train for him.", diff:"easy" },
+  { q:"Which broomstick does Harry receive in his first year?", options:["Cleansweep Seven","Comet 260","Firebolt","Nimbus 2000"], answer:3, fact:"Professor McGonagall arranges the Nimbus 2000 after seeing Harry's flying talent — making him the youngest house Quidditch player in a century.", diff:"easy" },
+  { q:"What is the name of the house-elf who tries to protect Harry in his second year?", options:["Kreacher","Winky","Dobby","Hokey"], answer:2, fact:"Dobby is freed from the Malfoys when Harry tricks Lucius into giving him a sock. He proudly declares: 'Dobby is a free elf!'", diff:"easy" },
+  { q:"What is the name of Ron's pet rat?", options:["Whiskers","Scabbers","Nibbles","Squeak"], answer:1, fact:"Scabbers had been in the Weasley family for twelve years — suspiciously long for a common garden rat, as Harry later discovers.", diff:"easy" },
+  { q:"What ball must the Seeker catch to end a Quidditch match?", options:["The Quaffle","The Bludger","The Golden Snitch","The Golden Quaffle"], answer:2, fact:"The Golden Snitch is walnut-sized, has silver wings, and is worth 150 points. Catching it almost always wins the game.", diff:"easy" },
+  { q:"What do students at Hogwarts use to write with?", options:["Pencils","Fountain pens","Quills and ink","Enchanted chalk"], answer:2, fact:"Students write on parchment with quills. Fred and George's joke shop later sells Self-Inking, Spell-Checking, and Smart-Answer quills.", diff:"easy" },
   // ── MEDIUM ────────────────────────────────────────────────────────────────
   { q:"Which potion makes you look exactly like someone else?", options:["Veritaserum","Amortentia","Felix Felicis","Polyjuice Potion"], answer:3, fact:"Polyjuice Potion takes a full month to brew. Hermione accidentally added cat hair once and turned partly into a cat.", diff:"medium" },
   { q:"What does the Mirror of Erised show you?", options:["Your greatest fear","The future","Your deepest desire","Your true self"], answer:2, fact:"Erised is 'desire' spelled backwards. The inscription reads: 'I show not your face but your heart's desire.'", diff:"medium" },
@@ -331,6 +382,19 @@ const allQuestions = [
   { q:"What is Hagrid's official job title at Hogwarts?", options:["Potions teacher","Librarian","Gamekeeper and groundskeeper","Caretaker"], answer:2, fact:"Hagrid later also becomes the Care of Magical Creatures teacher in Harry's third year at Hogwarts.", diff:"medium" },
   { q:"Which pub in Hogsmeade are students known for visiting?", options:["The Leaky Cauldron","The Hog's Head","The Three Broomsticks","The Broomstick Inn"], answer:2, fact:"The Three Broomsticks is famous for its warm Butterbeer, lovingly served by Madam Rosmerta.", diff:"medium" },
   { q:"What are the colours of Gryffindor scarves and ties?", options:["Blue and bronze","Green and silver","Yellow and black","Scarlet and gold"], answer:3, fact:"Scarlet and gold represent bravery and the lion — Gryffindor's mascot. The house was founded by Godric Gryffindor.", diff:"medium" },
+  { q:"What form does Harry's Patronus take?", options:["A phoenix","A stag","A lion","A hippogriff"], answer:1, fact:"Harry's Patronus is a stag — the same form his father James took as an Animagus, earning him the nickname 'Prongs'.", diff:"medium" },
+  { q:"What creatures guard the wizard prison of Azkaban?", options:["Dementors","Trolls","Giants","Inferi"], answer:0, fact:"Dementors drain happiness and can suck out a person's soul with their 'kiss'. Chocolate helps restore warmth after an encounter.", diff:"medium" },
+  { q:"What phrase activates the Marauder's Map?", options:["'Open sesame, secrets of Hogwarts'","'I solemnly swear that I am up to no good'","'Reveal your secrets to a Marauder'","'Mischief managed'"], answer:1, fact:"'Mischief managed' wipes the map clean again. It was created by Moony, Wormtail, Padfoot, and Prongs — Lupin, Pettigrew, Sirius, and James.", diff:"medium" },
+  { q:"What monster lives in the Chamber of Secrets?", options:["An Acromantula","A dragon","A Basilisk","A Cerberus"], answer:2, fact:"The Basilisk kills with its stare — but everyone at Hogwarts only ever saw it indirectly, through water, mirrors, ghosts, or a camera, so no one died.", diff:"medium" },
+  { q:"Which two schools compete against Hogwarts in the Triwizard Tournament?", options:["Ilvermorny and Durmstrang","Beauxbatons and Castelobruxo","Beauxbatons and Durmstrang","Durmstrang and Mahoutokoro"], answer:2, fact:"Beauxbatons arrives in a carriage pulled by giant winged horses; Durmstrang surfaces in the lake aboard a ghostly ship.", diff:"medium" },
+  { q:"What flying vehicle do Ron and Harry take to Hogwarts in their second year?", options:["A flying carpet","A flying Ford Anglia","The Knight Bus","Sirius's motorbike"], answer:1, fact:"After missing the train, they fly Mr Weasley's enchanted Ford Anglia to school — and crash it straight into the Whomping Willow.", diff:"medium" },
+  { q:"What magical device does Hermione use to attend multiple classes at once?", options:["A Time-Turner","A Pensieve","A Portkey","A Deluminator"], answer:0, fact:"Professor McGonagall arranged Hermione's Time-Turner with the Ministry. She returns it at the end of third year, exhausted by her impossible timetable.", diff:"medium" },
+  { q:"What is the name of Fred and George's joke shop in Diagon Alley?", options:["Zonko's Wizarding Tricks","Gambol and Japes","Weasleys' Wizard Wheezes","The Whizzing Whizbee"], answer:2, fact:"They opened it with the thousand-Galleon Triwizard winnings Harry gave them — refusing to take no for an answer.", diff:"medium" },
+  { q:"What kind of creature is Buckbeak?", options:["A thestral","A griffin","A winged horse","A hippogriff"], answer:3, fact:"Hippogriffs are deeply proud creatures — you must bow and wait for them to bow back. Draco Malfoy learned the hard way what happens when you insult one.", diff:"medium" },
+  { q:"What plant does Harry use to breathe underwater in the second Triwizard task?", options:["Bubotuber","Gillyweed","Mandrake leaf","Devil's Snare"], answer:1, fact:"Dobby gives Harry the gillyweed — in the book, that is. In the film it's Neville, the budding Herbology expert.", diff:"medium" },
+  { q:"What happens to Gilderoy Lockhart at the end of Chamber of Secrets?", options:["He is arrested by the Ministry","His own Memory Charm backfires and wipes his memory","He is petrified by the Basilisk","He flees to Albania"], answer:1, fact:"Lockhart tries to erase Harry and Ron's memories with Ron's broken wand. It backfires spectacularly, and he ends up in St Mungo's, cheerfully signing autographs he doesn't understand.", diff:"medium" },
+  { q:"Which house did Cedric Diggory belong to?", options:["Gryffindor","Ravenclaw","Hufflepuff","Slytherin"], answer:2, fact:"Cedric was Hufflepuff's champion and Seeker — brave, fair, and kind. Dumbledore asked the school to remember him as proof of those qualities.", diff:"medium" },
+  { q:"Who is the Divination teacher's famous prophecy about?", options:["Neville Longbottom only","Harry Potter and Lord Voldemort","Albus Dumbledore","The Ministry of Magic"], answer:1, fact:"Trelawney's prophecy — 'the one with the power to vanquish the Dark Lord approaches' — could have applied to Neville too. Voldemort chose Harry, marking him as his equal.", diff:"medium" },
   // ── HARD ──────────────────────────────────────────────────────────────────
   { q:"What are the two Unforgivable Curses that are not the Killing Curse?", options:["Crucio and Imperius","Crucio and Sectumsempra","Imperius and Morsmordre","Sectumsempra and Imperius"], answer:0, fact:"The three Unforgivable Curses are Avada Kedavra (killing), Crucio (torture), and Imperius (total mind control).", diff:"hard" },
   { q:"What creature guards the entrance to the Gryffindor common room?", options:["A gargoyle","A knight","A portrait of the Fat Lady","A dragon"], answer:2, fact:"The Fat Lady guards the Gryffindor portrait hole. She was once slashed by Sirius Black when she refused to let him in without the password.", diff:"hard" },
@@ -342,6 +406,19 @@ const allQuestions = [
   { q:"What does Amortentia smell like to Harry Potter?", options:["Pumpkin pasties, Butterbeer, broomstick polish","Treacle tart, a broomstick, and something flowery from the Burrow","Chocolate frogs, parchment, his mother's perfume","Firewhisky, pine trees, and his father's aftershave"], answer:1, fact:"Harry smells treacle tart, the woody handle of a broom, and a flowery scent from the Burrow — likely Ginny. Amortentia smells different to everyone.", diff:"hard" },
   { q:"What does the incantation Alohomora do?", options:["Creates fire","Unlocks doors and windows","Repels Dementors","Reveals hidden objects"], answer:1, fact:"Alohomora is the Unlocking Charm, first used by Hermione in Philosopher's Stone to open the door to Fluffy's corridor.", diff:"hard" },
   { q:"What is the name of the spell that causes an opponent to vomit slugs?", options:["Slugulus Eructo","Vermillious","Slugulus Erecto","Slug-Vomiting Hex"], answer:0, fact:"Ron accidentally casts Slugulus Eructo on himself in Chamber of Secrets when his broken wand backfires. He spends hours vomiting slugs into a bucket.", diff:"hard" },
+  { q:"What form does Snape's Patronus take?", options:["A doe","A raven","A serpent","A bat"], answer:0, fact:"Snape's Patronus is a doe — the same as Lily Potter's. 'After all this time?' Dumbledore asks. 'Always,' says Snape.", diff:"hard" },
+  { q:"What is Dumbledore's full name?", options:["Albus Wulfric Percival Brian Dumbledore","Albus Percival Wulfric Brian Dumbledore","Albus Brian Percival Wulfric Dumbledore","Albus Percival Brian Wulfric Dumbledore"], answer:1, fact:"Albus Percival Wulfric Brian Dumbledore — a name he shares in part with his father Percival, who died in Azkaban.", diff:"hard" },
+  { q:"Which three wand cores does Ollivander use in his wands?", options:["Phoenix feather, dragon heartstring, unicorn hair","Phoenix feather, veela hair, unicorn hair","Dragon heartstring, thestral hair, phoenix feather","Unicorn hair, kelpie mane, dragon heartstring"], answer:0, fact:"Ollivander considers these the three 'supreme' cores. Other wandmakers use different materials — Fleur's wand contains her grandmother's veela hair.", diff:"hard" },
+  { q:"What is the address of the Order of the Phoenix headquarters?", options:["10 Downing Street","13 Spinner's End","12 Grimmauld Place","7 Godric's Hollow Lane"], answer:2, fact:"Number 12, Grimmauld Place is the Black family home, inherited by Sirius. It's hidden by a Fidelius Charm and invisible to the Muggles living either side.", diff:"hard" },
+  { q:"What must you witness before you can see a Thestral?", options:["A dark ritual","Death","A Dementor's Kiss","Your own Boggart"], answer:1, fact:"Thestrals are visible only to those who have seen death and accepted it. Harry first sees them after witnessing Cedric's murder.", diff:"hard" },
+  { q:"What punishment does Professor Umbridge give Harry in detention?", options:["Cleaning trophies without magic","Writing lines with a quill that cuts the words into his hand","Sorting decaying Flobberworms","A week's ban from Quidditch"], answer:1, fact:"Her black quill carves 'I must not tell lies' into the back of Harry's hand, writing in his own blood. The scars never fully fade.", diff:"hard" },
+  { q:"Who is the Half-Blood Prince?", options:["Tom Riddle","Sirius Black","Severus Snape","Remus Lupin"], answer:2, fact:"Snape's mother was the witch Eileen Prince; his father Tobias Snape was a Muggle — making Severus, in his own words, the Half-Blood Prince.", diff:"hard" },
+  { q:"What magical phenomenon occurs when Harry's and Voldemort's wands connect in the graveyard?", options:["Priori Incantatem","Legilimens Reversa","Protego Diadem","Expelliarmus Maxima"], answer:0, fact:"Their wands share twin phoenix-feather cores from Fawkes, so they cannot truly duel. The reverse-spell effect forces Voldemort's wand to disgorge echoes of his victims.", diff:"hard" },
+  { q:"How old is Nicolas Flamel when he decides to destroy the Philosopher's Stone?", options:["About 300 years old","About 500 years old","About 665 years old","Over 900 years old"], answer:2, fact:"Flamel and his wife Perenelle had enough Elixir to set their affairs in order before dying — which Dumbledore compares to going to bed after a very, very long day.", diff:"hard" },
+  { q:"What is the name of the room that appears only when someone truly needs it?", options:["The Chamber of Reception","The Room of Requirement","The Vanishing Vault","The Shifting Chamber"], answer:1, fact:"Also called the Come and Go Room, it equips itself for the seeker's need — DA headquarters, a hiding place for a thousand years of contraband, or rows of chamber pots.", diff:"hard" },
+  { q:"Which Quidditch team does Viktor Krum play Seeker for at the World Cup?", options:["Ireland","Transylvania","Poland","Bulgaria"], answer:3, fact:"Krum catches the Snitch but Ireland still wins 170–160 — he ended the match on his own terms, knowing Bulgaria couldn't recover.", diff:"hard" },
+  { q:"What does O.W.L. stand for?", options:["Ordinary Wizarding Levels","Official Wizardry Licence","Outstanding Wizard Learning","Ordered Wizarding Lessons"], answer:0, fact:"Students sit their Ordinary Wizarding Levels in fifth year. The grades run Outstanding, Exceeds Expectations, Acceptable — then Poor, Dreadful, and Troll.", diff:"hard" },
+  { q:"Which teacher does the centaur Firenze replace in Harry's fifth year?", options:["Professor Vector","Professor Sprout","Professor Trelawney","Professor Binns"], answer:2, fact:"When Umbridge sacks Trelawney, Dumbledore hires the centaur Firenze — to Umbridge's fury, as she despises 'half-breeds'. Later the two share the subject.", diff:"hard" },
   // ── EXPERT ────────────────────────────────────────────────────────────────
   { q:"What is the name of the Ravenclaw student whose diadem became a Horcrux?", options:["Cho Chang","Padma Patil","Helena Ravenclaw","Luna Lovegood"], answer:2, fact:"Helena Ravenclaw is the Grey Lady, ghost of Ravenclaw. She stole her mother's diadem, which Tom Riddle found and turned into a Horcrux.", diff:"expert" },
   { q:"What does Dumbledore leave to Ron in his will?", options:["The Sword of Gryffindor","The Tales of Beedle the Bard","The Deluminator","A Sneakoscope"], answer:2, fact:"The Deluminator can absorb and release light — but it also captured Hermione's voice and guided Ron back to Harry and Hermione after he abandoned the Horcrux hunt.", diff:"expert" },
@@ -375,6 +452,18 @@ const allQuestions = [
   { q:"What does the Mirror of Erised truly show Dumbledore?", options:["Himself as the most powerful wizard alive","His family alive and reconciled","The complete set of Deathly Hallows","Himself defeating Grindelwald without regret"], answer:1, fact:"Dumbledore deflects Harry's question with a joke about woolly socks. He later admits the truth: what he truly desires is to see his family — whole, together, and at peace.", diff:"expert" },
   { q:"What does Snape's Unbreakable Vow with Narcissa actually bind him to do?", options:["Protect Draco from harm, watch over him at school, and complete his mission if he fails","Kill Dumbledore at the first opportunity regardless of Draco","Spy on the Order and deliver intelligence to Voldemort","Ensure the Dark Lord's return by delivering the prophecy"], answer:0, fact:"The three conditions are: watch over Draco, protect him from harm, and if Draco cannot kill Dumbledore, carry out the deed himself. All three were fulfilled — though Snape always acted on Dumbledore's instructions.", diff:"expert" },
   { q:"What are the three Deathly Hallows and who possesses each at the time Harry learns of them?", options:["Wand (Dumbledore), Stone (Voldemort), Cloak (Harry)","Wand (Voldemort), Stone (in the first Snitch), Cloak (Harry)","Wand (Grindelwald's grave), Stone (Gaunt ring at Hogwarts), Cloak (Harry)","Wand (Dumbledore's tomb), Stone (inside the first Golden Snitch), Cloak (Harry)"], answer:3, fact:"When Harry learns the story in Deathly Hallows: Voldemort has stolen the Elder Wand from Dumbledore's tomb, the Stone is inside Harry's first Snitch, and Harry has carried the Cloak since first year.", diff:"expert" },
+  { q:"Who is R.A.B., the mysterious note-writer who stole the locket Horcrux?", options:["Rodolphus Alecto Black","Regulus Arcturus Black","Rabastan Aurelius Burke","Reginald Archibald Bones"], answer:1, fact:"Sirius's younger brother Regulus turned against Voldemort after seeing what he did to Kreacher. He drank the potion in the cave himself and died retrieving the locket.", diff:"expert" },
+  { q:"Who actually destroys the locket Horcrux, and with what?", options:["Harry, with a Basilisk fang","Ron, with the Sword of Gryffindor","Hermione, with Fiendfyre","Neville, with the Sword of Gryffindor"], answer:1, fact:"The sword, impregnated with Basilisk venom since Chamber of Secrets, appears to Ron in a frozen pool. The locket taunts him with his deepest insecurities before he strikes.", diff:"expert" },
+  { q:"In which prison does Grindelwald spend his final years?", options:["Azkaban","The Nurmengard tower he built","A Ministry cell in Berlin","The dungeons of Durmstrang"], answer:1, fact:"Nurmengard was the prison Grindelwald built for his own enemies, bearing the slogan 'For the Greater Good'. He died there — in the books, refusing to tell Voldemort where the Elder Wand was.", diff:"expert" },
+  { q:"Whose murder did Voldemort use to turn Nagini into a Horcrux?", options:["Frank Bryce","Bertha Jorkins","Charity Burbage","Hepzibah Smith"], answer:1, fact:"Voldemort killed the Ministry witch Bertha Jorkins in Albania after extracting information about the Triwizard Tournament and Barty Crouch Jr — then used her death for his final planned Horcrux.", diff:"expert" },
+  { q:"What is the name of Dumbledore's sister, whose death haunted him all his life?", options:["Ariana","Kendra","Honoria","Vindicta"], answer:0, fact:"Ariana was left magically unstable after an attack by Muggle boys. She died in a three-way duel between Albus, Aberforth, and Grindelwald — and no one ever knew whose curse killed her.", diff:"expert" },
+  { q:"From whom did Voldemort steal Helga Hufflepuff's cup?", options:["Helena Ravenclaw","Hepzibah Smith","Burke of Borgin and Burkes","The Smith family vault at Gringotts"], answer:1, fact:"Hepzibah Smith, a descendant of Hufflepuff, showed young Tom Riddle the cup and Slytherin's locket. He poisoned her, stole both, and framed her house-elf Hokey.", diff:"expert" },
+  { q:"Where did Voldemort hide Rowena Ravenclaw's diadem before making it a Horcrux?", options:["The Gaunt shack","The Chamber of Secrets","A hollow tree in an Albanian forest","The cave by the sea"], answer:2, fact:"Helena Ravenclaw hid the stolen diadem in Albania and, charmed by Tom Riddle, told him where. He later hid it in the Room of Requirement — believing only he had ever found the room.", diff:"expert" },
+  { q:"What does Narcissa Malfoy ask Harry in the Forbidden Forest before lying to Voldemort?", options:["Whether Voldemort can be defeated","Whether Draco is alive and in the castle","Whether Snape stayed loyal","Whether Lucius survived the battle"], answer:1, fact:"Learning Draco is alive, Narcissa declares Harry dead to Voldemort's face. Her lie — a mother's love, not loyalty — delivers the final blow to Voldemort's cause.", diff:"expert" },
+  { q:"What gift does Voldemort give Wormtail to replace the hand he sacrificed?", options:["A gauntlet of goblin steel","A hand of enchanted silver","A regrown hand via dark ritual","Nagini's protection for life"], answer:1, fact:"The silver hand ultimately kills its owner: when Wormtail hesitates to strangle Harry — repaying his life debt — the hand turns on his own throat.", diff:"expert" },
+  { q:"Which vault at Gringotts holds Harry's family gold on his first visit?", options:["Vault 713","Vault 394","Vault 687","Vault 998"], answer:2, fact:"Vault 687 holds the Potter gold. Vault 713 — visited the same day — held the Philosopher's Stone, in a small grubby package Hagrid collected for Dumbledore.", diff:"expert" },
+  { q:"Who wrote 'A History of Magic' and lived in Godric's Hollow?", options:["Miranda Goshawk","Bathilda Bagshot","Adalbert Waffling","Emeric Switch"], answer:1, fact:"Bathilda Bagshot was Grindelwald's great-aunt and a neighbour of both the Dumbledores and the Potters. By the time Harry visits, Nagini is hiding inside her corpse — one of the series' darkest moments.", diff:"expert" },
+  { q:"What shape is the scar on Dumbledore's left knee?", options:["A lightning bolt","A perfect map of the London Underground","A phoenix in flight","A five-pointed star"], answer:1, fact:"Dumbledore mentions this in the very first chapter of Philosopher's Stone: 'Scars can come in handy. I have one myself above my left knee that is a perfect map of the London Underground.'", diff:"expert" },
 ];
 
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
@@ -393,6 +482,7 @@ let score = 0;
 let lifelineUsed = false;
 let currentDifficulty = '';
 let answered = false;
+let correctBtn = null;
 
 // ─── EXPERT UNLOCK ───────────────────────────────────────────────────────────
 function isExpertUnlocked() {
@@ -422,6 +512,35 @@ function updateWelcomeScreen() {
   }
 }
 
+// ─── HOUSES ──────────────────────────────────────────────────────────────────
+const HOUSES = {
+  gryffindor: { name:'Gryffindor', high:'Godric would be proud — bravery and brains in equal measure.', low:'Courage isn\'t knowing everything. Back into the fray, Gryffindor.' },
+  slytherin:  { name:'Slytherin',  high:'Cunning and ambition, expertly applied. Salazar approves.', low:'A true Slytherin turns setbacks into strategy. Plot your comeback.' },
+  ravenclaw:  { name:'Ravenclaw',  high:'Wit beyond measure is man\'s greatest treasure — and you\'ve got plenty.', low:'Even Rowena had off days. The library awaits, Ravenclaw.' },
+  hufflepuff: { name:'Hufflepuff', high:'Loyal, patient, and quietly brilliant. Helga would beam.', low:'Hufflepuffs are particularly good finders — go find those answers.' },
+};
+
+function getHouse() {
+  const h = localStorage.getItem('hp_house');
+  return HOUSES[h] ? h : null;
+}
+
+function setHouse(house) {
+  AudioEngine.playClick();
+  if (house) localStorage.setItem('hp_house', house);
+  else localStorage.removeItem('hp_house');
+  applyHouse();
+}
+
+function applyHouse() {
+  const house = getHouse();
+  if (house) document.body.dataset.house = house;
+  else delete document.body.dataset.house;
+  document.querySelectorAll('.house-btn').forEach(b => {
+    b.classList.toggle('selected', (b.dataset.house || null) === (house || null));
+  });
+}
+
 // ─── SCREEN TRANSITIONS ──────────────────────────────────────────────────────
 function switchScreen(fromId, toId, callback) {
   const from = document.getElementById(fromId);
@@ -437,28 +556,226 @@ function switchScreen(fromId, toId, callback) {
   }, 380);
 }
 
+// ─── AUDIO ───────────────────────────────────────────────────────────────────
+const AudioEngine = {
+  ctx: null, masterGain: null, musicGain: null, sfxGain: null,
+  enabled: localStorage.getItem('hp_sound') === 'on',
+  track: localStorage.getItem('hp_track') === 'ambient' ? 'ambient' : 'theme',
+  themeAudio: null, themeFailed: false,
+  musicTimer: null, nextNoteTime: 0, step: 0,
+
+  init() {
+    if (this.ctx) return;
+    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    this.masterGain = this.ctx.createGain();
+    this.masterGain.connect(this.ctx.destination);
+    this.musicGain = this.ctx.createGain();
+    this.musicGain.gain.value = 0.055;
+    this.musicGain.connect(this.masterGain);
+    this.sfxGain = this.ctx.createGain();
+    this.sfxGain.gain.value = 0.25;
+    this.sfxGain.connect(this.masterGain);
+  },
+
+  ensureRunning() {
+    this.init();
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+  },
+
+  toggle() {
+    this.enabled = !this.enabled;
+    localStorage.setItem('hp_sound', this.enabled ? 'on' : 'off');
+    if (this.enabled) {
+      this.ensureRunning();
+      this.startMusic();
+    } else {
+      this.stopMusic();
+    }
+    this.updateButtons();
+  },
+
+  switchTrack() {
+    this.track = this.track === 'theme' ? 'ambient' : 'theme';
+    localStorage.setItem('hp_track', this.track);
+    if (this.enabled) { this.stopMusic(); this.startMusic(); }
+    this.updateButtons();
+  },
+
+  updateButtons() {
+    const mBtn = document.getElementById('music-toggle');
+    mBtn.textContent = this.enabled ? '🔊' : '🔇';
+    mBtn.setAttribute('aria-pressed', String(this.enabled));
+    const tBtn = document.getElementById('track-toggle');
+    tBtn.classList.toggle('hidden', !this.enabled || this.themeFailed);
+    tBtn.textContent = this.track === 'theme' ? '🎵 Theme' : '✨ Ambient';
+  },
+
+  // ── music ──
+  startMusic() {
+    if (!this.enabled) return;
+    if (this.track === 'theme' && !this.themeFailed) this.startTheme();
+    else this.startAmbient();
+  },
+
+  stopMusic() {
+    this.stopAmbient();
+    if (this.themeAudio) this.themeAudio.pause();
+  },
+
+  startTheme() {
+    if (!this.themeAudio) {
+      this.themeAudio = new Audio('audio/hedwigs-theme.mp3');
+      this.themeAudio.loop = true;
+      this.themeAudio.volume = 0.35;
+      this.themeAudio.addEventListener('error', () => {
+        this.themeFailed = true;
+        this.track = 'ambient';
+        if (this.enabled) this.startAmbient();
+        this.updateButtons();
+      });
+    }
+    this.themeAudio.play().catch(() => {
+      this.themeFailed = true;
+      this.track = 'ambient';
+      if (this.enabled) this.startAmbient();
+      this.updateButtons();
+    });
+  },
+
+  startAmbient() {
+    this.ensureRunning();
+    if (this.musicTimer) return;
+    this.step = 0;
+    this.nextNoteTime = this.ctx.currentTime + 0.1;
+    this.musicTimer = setInterval(() => this.scheduleAmbient(), 25);
+  },
+
+  stopAmbient() {
+    if (this.musicTimer) { clearInterval(this.musicTimer); this.musicTimer = null; }
+  },
+
+  scheduleAmbient() {
+    while (this.nextNoteTime < this.ctx.currentTime + 0.12) {
+      this.playAmbientStep(this.step, this.nextNoteTime);
+      this.step = (this.step + 1) % AMBIENT_PATTERN.length;
+      this.nextNoteTime += 0.42;
+    }
+  },
+
+  playAmbientStep(step, t) {
+    const freq = AMBIENT_PATTERN[step];
+    if (freq) this.celesta(freq, t);
+    if (step % 16 === 0) this.celesta(164.81, t, 2.4, 0.5); // low E drone
+  },
+
+  // music-box voice: sine + quiet octave partial, instant attack, long decay
+  celesta(freq, t, decay = 1.2, vol = 1) {
+    const env = this.ctx.createGain();
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.linearRampToValueAtTime(vol, t + 0.002);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+    env.connect(this.musicGain);
+    [[freq, 1], [freq * 2, 0.3]].forEach(([f, g]) => {
+      const osc = this.ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      const og = this.ctx.createGain();
+      og.gain.value = g;
+      osc.connect(og); og.connect(env);
+      osc.start(t); osc.stop(t + decay + 0.1);
+    });
+  },
+
+  // ── sfx ──
+  tone(freq, { time = 0, dur = 0.15, type = 'sine', gain = 1, slideTo = null } = {}) {
+    if (!this.enabled || !this.ctx) return;
+    const t = this.ctx.currentTime + time;
+    const osc = this.ctx.createOscillator();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t);
+    if (slideTo) osc.frequency.linearRampToValueAtTime(slideTo, t + dur);
+    const env = this.ctx.createGain();
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.linearRampToValueAtTime(gain, t + 0.008);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(env); env.connect(this.sfxGain);
+    osc.start(t); osc.stop(t + dur + 0.1);
+  },
+
+  sfxReady() {
+    if (!this.enabled) return false;
+    this.ensureRunning();
+    return true;
+  },
+
+  playClick() {
+    if (!this.sfxReady()) return;
+    this.tone(880, { dur: 0.06, type: 'triangle', gain: 0.5 });
+  },
+
+  playCorrect() {
+    if (!this.sfxReady()) return;
+    this.tone(1046.5, { dur: 0.25, gain: 0.8 });
+    this.tone(1318.5, { time: 0.11, dur: 0.3, gain: 0.8 });
+    this.tone(1568,   { time: 0.22, dur: 0.45, gain: 0.8 });
+  },
+
+  playWrong() {
+    if (!this.sfxReady()) return;
+    this.tone(146.8, { dur: 0.5, type: 'triangle', gain: 0.9, slideTo: 110 });
+  },
+
+  playFanfare() {
+    if (!this.sfxReady()) return;
+    [523.25, 659.26, 783.99, 1046.5].forEach((f, i) =>
+      this.tone(f, { time: i * 0.14, dur: 0.35, gain: 0.7 }));
+    [523.25, 659.26, 783.99].forEach(f =>
+      this.tone(f, { time: 0.6, dur: 1.4, gain: 0.5 }));
+  },
+};
+
+// Original arpeggiated pattern over E natural minor — deliberately not Hedwig's Theme.
+// null = rest. 32 steps at ~72 BPM eighths.
+const AMBIENT_PATTERN = [
+  329.63, null, 493.88, 659.26, null, 587.33, 493.88, null,
+  440.00, null, 659.26, null, 783.99, null, 659.26, null,
+  392.00, null, 587.33, 783.99, null, 659.26, 493.88, null,
+  440.00, null, 493.88, null, 329.63, null, null, null,
+];
+
+// If sound was left on, start it on the first user interaction (autoplay policy).
+document.addEventListener('click', () => {
+  if (AudioEngine.enabled) { AudioEngine.ensureRunning(); AudioEngine.startMusic(); }
+}, { once: true });
+
 // ─── QUIZ LOGIC ──────────────────────────────────────────────────────────────
 function shuffle(arr) {
-  return [...arr].sort(() => Math.random() - 0.5);
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildRound(difficulty) {
+  score = 0;
+  currentIndex = 0;
+  lifelineUsed = false;
+  answered = false;
+  const pool = difficulty === 'mixed'
+    ? allQuestions.filter(q => ['easy','medium','hard'].includes(q.diff))
+    : allQuestions.filter(q => q.diff === difficulty);
+  currentQuestions = shuffle(pool).slice(0, 10);
+  document.getElementById('ll-btn').disabled = false;
 }
 
 function startQuiz(difficulty) {
   if (difficulty === 'expert' && !isExpertUnlocked()) return;
 
+  AudioEngine.playClick();
   currentDifficulty = difficulty;
-  score = 0;
-  currentIndex = 0;
-  lifelineUsed = false;
-  answered = false;
-
-  const pool = difficulty === 'mixed'
-    ? allQuestions.filter(q => ['easy','medium','hard'].includes(q.diff))
-    : allQuestions.filter(q => q.diff === difficulty);
-
-  currentQuestions = shuffle(pool).slice(0, 10);
-
-  const llBtn = document.getElementById('ll-btn');
-  llBtn.disabled = false;
+  buildRound(difficulty);
 
   const cfg = diffConfig[difficulty];
   document.getElementById('quiz-diff-tag').innerHTML =
@@ -489,10 +806,11 @@ function showQuestion() {
   const indexed = q.options.map((text, i) => ({ text, isCorrect: i === q.answer }));
   const shuffled = shuffle(indexed);
 
+  correctBtn = null;
   shuffled.forEach((opt, i) => {
     const btn = document.createElement('button');
     btn.className = 'option';
-    btn.dataset.correct = opt.isCorrect;
+    if (opt.isCorrect) correctBtn = btn;
     btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${opt.text}</span>`;
     btn.onclick = () => selectAnswer(btn, opt.isCorrect, q.fact);
     container.appendChild(btn);
@@ -511,14 +829,16 @@ function selectAnswer(btn, isCorrect, fact) {
   document.querySelectorAll('.option').forEach(b => {
     b.classList.add('disabled');
     b.onclick = null;
-    if (b.dataset.correct === 'true') b.classList.add('correct');
+    if (b === correctBtn) b.classList.add('correct');
   });
 
   if (isCorrect) {
     score++;
     btn.classList.add('correct');
+    AudioEngine.playCorrect();
   } else {
     btn.classList.add('wrong');
+    AudioEngine.playWrong();
   }
 
   const factEl = document.createElement('div');
@@ -531,15 +851,17 @@ function selectAnswer(btn, isCorrect, fact) {
 
 function useFiftyFifty() {
   if (lifelineUsed || answered) return;
+  AudioEngine.playClick();
   lifelineUsed = true;
   document.getElementById('ll-btn').disabled = true;
 
   const wrongOnes = Array.from(document.querySelectorAll('.option'))
-    .filter(b => b.dataset.correct !== 'true');
+    .filter(b => b !== correctBtn);
   shuffle(wrongOnes).slice(0, 2).forEach(b => b.classList.add('eliminated'));
 }
 
 function nextQuestion() {
+  AudioEngine.playClick();
   currentIndex++;
   if (currentIndex < currentQuestions.length) {
     showQuestion();
@@ -549,7 +871,8 @@ function nextQuestion() {
 }
 
 function showResult() {
-  document.getElementById('result-score').textContent = `${score}/10`;
+  document.getElementById('result-score').textContent = `${score}/${currentQuestions.length}`;
+  if (score >= 6) AudioEngine.playFanfare();
 
   const ratings = [
     { min:10, rating:'Perfect Score!',   comment:'"Outstanding! You could teach at Hogwarts yourself. Dumbledore would be speechless."' },
@@ -563,6 +886,16 @@ function showResult() {
   document.getElementById('result-rating').textContent = r.rating;
   document.getElementById('result-comment').textContent = r.comment;
 
+  const house = getHouse();
+  const houseLineEl = document.getElementById('result-house-line');
+  if (house) {
+    const h = HOUSES[house];
+    houseLineEl.textContent = score >= 6 ? h.high : h.low;
+    houseLineEl.classList.remove('hidden');
+  } else {
+    houseLineEl.classList.add('hidden');
+  }
+
   const expertBanner = document.getElementById('expert-unlocked-banner');
   if (currentDifficulty === 'hard' && score >= 7 && !isExpertUnlocked()) {
     unlockExpert();
@@ -575,21 +908,15 @@ function showResult() {
 }
 
 function replayDifficulty() {
+  AudioEngine.playClick();
   switchScreen('screen-result', 'screen-quiz', () => {
-    score = 0;
-    currentIndex = 0;
-    lifelineUsed = false;
-    answered = false;
-    const pool = currentDifficulty === 'mixed'
-      ? allQuestions.filter(q => ['easy','medium','hard'].includes(q.diff))
-      : allQuestions.filter(q => q.diff === currentDifficulty);
-    currentQuestions = shuffle(pool).slice(0, 10);
-    document.getElementById('ll-btn').disabled = false;
+    buildRound(currentDifficulty);
     showQuestion();
   });
 }
 
 function backToMenu() {
+  AudioEngine.playClick();
   switchScreen('screen-result', 'screen-welcome', updateWelcomeScreen);
 }
 
@@ -609,6 +936,8 @@ function launchConfetti(color) {
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
 updateWelcomeScreen();
+applyHouse();
+AudioEngine.updateButtons();
 </script>
 </body>
 </html>
