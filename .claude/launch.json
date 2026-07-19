@@ -4,8 +4,8 @@
     {
       "name": "hp-trivia",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8325"],
-      "port": 8325
+      "runtimeArgs": ["-m", "http.server", "8327"],
+      "port": 8327
     }
   ]
 }

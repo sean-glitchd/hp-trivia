@@ -12,7 +12,7 @@ import { FX } from './fx.js';
 import { Duel } from './duel.js';
 import { Arsenal } from './arsenal.js';
 import { composeRoundHooks } from './abilities.js';
-import { Typing } from './typing.js';
+import { Gesture } from './gesture.js';
 import { Cards } from './cards.js';
 import { Guide } from './guide.js';
 
@@ -585,15 +585,16 @@ function beginPending(ev) {
         }
       }
     },
-    // Typing challenge: once per year per session, at the Q5→Q6 boundary of a
-    // lesson (not exams). Success grants a Lumos charge; skip/timeout is free.
+    // Spell-casting challenge: once per year per session, at the Q5→Q6 boundary
+    // of a lesson (not exams). Trace the wand movement; success grants a Lumos
+    // charge; skip is free, no penalty.
     getInterstitial: (nextIndex) => {
       if (kind !== 'lesson' || nextIndex !== 5) return null;
       if (typingDoneThisSession.has(year)) return null;
       typingDoneThisSession.add(year);
       const incantation = YEAR_INCANT[year] || 'Lumos';
-      return (done) => Typing.run({
-        incantation, seconds: 10,
+      return (done) => Gesture.run({
+        incantation,
         onDone: ({ success }) => {
           if (success) {
             const g = Arsenal.grant('lu', 1);

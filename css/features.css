@@ -546,3 +546,32 @@ body.quill-mode, body.quill-mode * {
 @media (prefers-reduced-motion: reduce) {
   .guide-advance { animation: none !important; }
 }
+
+/* ═══ Draw-to-cast gesture challenge (gesture.js) ═══════════════════════════ */
+.gesture-overlay {
+  position: fixed; inset: 0; z-index: 300;
+  display: flex; align-items: flex-start; justify-content: center; padding-top: 9vh;
+  background: rgba(8,4,18,0.72); backdrop-filter: blur(4px);
+  opacity: 0; transition: opacity 0.26s ease;
+}
+.gesture-overlay.hidden { display: none; }
+.gesture-overlay.gesture-show { opacity: 1; }
+.gesture-card {
+  width: min(400px, 92vw); text-align: center;
+  background: linear-gradient(160deg, rgba(38,24,12,0.96), rgba(24,14,30,0.96));
+  border: 1px solid rgba(201,168,76,0.5); border-radius: 16px;
+  padding: 22px 22px 18px; box-shadow: 0 18px 60px rgba(0,0,0,0.6);
+}
+.gesture-label { font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+.gesture-spell { font-family: 'Cinzel Decorative', cursive; font-size: clamp(1.4rem, 5vw, 2rem); color: var(--gold-light, #f0d080); text-shadow: 0 0 20px rgba(240,208,128,0.4); margin-bottom: 6px; }
+.gesture-instruction { font-family: 'EB Garamond', serif; font-style: italic; font-size: 0.9rem; color: rgba(245,230,200,0.7); margin-bottom: 14px; }
+.gesture-stage { position: relative; margin: 0 auto; width: min(300px, 78vw); }
+#gesture-canvas { width: 100%; height: auto; aspect-ratio: 300/260; background: rgba(0,0,0,0.28); border: 1.5px solid rgba(201,168,76,0.35); border-radius: 12px; touch-action: none; cursor: crosshair; display: block; }
+#gesture-canvas.gesture-shake { animation: gesture-shake 0.2s; }
+@keyframes gesture-shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+.gesture-feedback { position: absolute; left: 0; right: 0; bottom: 8px; font-family: 'EB Garamond', serif; font-style: italic; font-size: 0.85rem; color: #f0a060; pointer-events: none; }
+.gesture-skip { margin-top: 12px; }
+@media (prefers-reduced-motion: reduce) {
+  .gesture-overlay { transition: none !important; }
+  #gesture-canvas.gesture-shake { animation: none !important; }
+}

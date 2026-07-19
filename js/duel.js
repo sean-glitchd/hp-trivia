@@ -13,7 +13,7 @@ import { AudioEngine } from './audio.js';
 import { FX } from './fx.js';
 import { ArsenalDuel } from './arsenal.js';
 import { composeRoundHooks } from './abilities.js';
-import { Typing } from './typing.js';
+import { Gesture } from './gesture.js';
 
 // ─── question pool ────────────────────────────────────────────────────────
 // Mirrors Year 7's exam blend in journey.js (YEARS[6].blend = {medium:1,
@@ -420,9 +420,8 @@ function duelQuestionShown(index) {
     setTimeout(() => {
       card.classList.remove('duel-intro-hidden');
       cacheWraithAnchor();
-      Typing.run({
+      Gesture.run({
         incantation: 'Expelliarmus',
-        seconds: 8,
         onDone: ({ success }) => { if (success) openingStrike(); },
       });
     }, 1300);
