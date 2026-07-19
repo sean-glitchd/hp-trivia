@@ -209,7 +209,7 @@ export function renderGradeSeal(score, total) {
     const char = CHARACTERS[line.char] || CHARACTERS.hat;
     const text = interpolate(line.text, {});
     commentEl.innerHTML = `<span class="grade-line-char" style="color:${char.color}">${char.emoji} ${char.name}</span><span class="grade-line-text">"${text}"</span>`;
-    speak(text);
+    speak(text, line.char);
   } else if (commentEl) {
     commentEl.textContent = '';
   }
@@ -221,17 +221,60 @@ export function isVoiceOn() {
   return localStorage.getItem('hp_voice') === 'on';
 }
 
-export function speak(text) {
+// Per-character voice character: pitch (lower = deeper) + rate (lower = slower),
+// with a gender hint used when the device offers both. Browser TTS is still
+// synthetic, but distinct pitch/rate + a good system voice reads far less flat.
+const VOICE_PROFILES = {
+  hagrid:     { pitch: 0.6,  rate: 0.85, gender: 'male' },   // big, warm, slow
+  mcgonagall: { pitch: 1.1,  rate: 1.0,  gender: 'female' }, // crisp, precise
+  dumbledore: { pitch: 0.9,  rate: 0.82, gender: 'male' },   // measured, gentle
+  snape:      { pitch: 0.7,  rate: 0.9,  gender: 'male' },   // low, deliberate
+  hat:        { pitch: 0.85, rate: 0.9 },
+  voldemort:  { pitch: 0.5,  rate: 0.9,  gender: 'male' },   // cold, deep
+  nick:       { pitch: 1.05, rate: 0.95, gender: 'male' },
+  friar:      { pitch: 0.95, rate: 0.9,  gender: 'male' },
+  default:    { pitch: 1.0,  rate: 0.95 },
+};
+
+// getVoices() is async on first load — cache and refresh on 'voiceschanged'
+// so the first utterance isn't stuck with an empty list.
+let cachedVoices = [];
+function loadVoices() {
+  if (!('speechSynthesis' in window)) return;
+  cachedVoices = window.speechSynthesis.getVoices() || [];
+}
+if ('speechSynthesis' in window) {
+  loadVoices();
+  try { window.speechSynthesis.addEventListener('voiceschanged', loadVoices); } catch (e) { /* ignore */ }
+}
+
+const GB_PRIORITY = ['Daniel', 'Arthur', 'Serena', 'Kate', 'Oliver', 'Google UK English Male', 'Google UK English Female'];
+const MALE_HINTS = /daniel|arthur|oliver|james|george|fred|male|man/i;
+const FEMALE_HINTS = /serena|kate|fiona|moira|karen|tessa|martha|female|woman/i;
+
+function pickVoice(profile) {
+  if (!cachedVoices.length) return null;
+  const gb = cachedVoices.filter(v => /en-GB/i.test(v.lang));
+  const pool = gb.length ? gb : cachedVoices.filter(v => /^en/i.test(v.lang));
+  if (!pool.length) return null;
+  if (profile.gender === 'male') { const m = pool.find(v => MALE_HINTS.test(v.name)); if (m) return m; }
+  if (profile.gender === 'female') { const f = pool.find(v => FEMALE_HINTS.test(v.name)); if (f) return f; }
+  for (const name of GB_PRIORITY) { const hit = pool.find(v => v.name.includes(name)); if (hit) return hit; }
+  return pool[0];
+}
+
+export function speak(text, characterKey = 'default') {
   if (!('speechSynthesis' in window)) return;
   if (!isVoiceOn()) return;
   if (!AudioEngine.enabled) return; // "only fires when sound is enabled"
   try {
     window.speechSynthesis.cancel();
+    const profile = VOICE_PROFILES[characterKey] || VOICE_PROFILES.default;
     const utt = new SpeechSynthesisUtterance(text);
-    const voices = window.speechSynthesis.getVoices();
-    const gb = voices.find(v => /en-GB/i.test(v.lang)) || voices.find(v => /^en/i.test(v.lang));
-    if (gb) utt.voice = gb;
-    utt.rate = 0.95;
+    const v = pickVoice(profile);
+    if (v) utt.voice = v;
+    utt.pitch = profile.pitch;
+    utt.rate = profile.rate;
     utt.volume = AudioEngine.getVolume ? AudioEngine.getVolume() : 1;
     window.speechSynthesis.speak(utt);
   } catch (e) { /* unsupported or blocked — no-op */ }

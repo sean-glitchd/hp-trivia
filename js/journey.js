@@ -941,7 +941,7 @@ function renderConfirmStep(name) {
   document.getElementById('sorting-confirm').addEventListener('click', () => {
     AudioEngine.playClick();
     const line = Dialogue.say('sorting-greet');
-    if (line) Dialogue.speak(line.text);
+    if (line) Dialogue.speak(line.text, line.char);
     startHatQuestions();
   });
 }

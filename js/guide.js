@@ -24,9 +24,9 @@ function markSeen(beatId) {
 }
 
 // ─── speakers ────────────────────────────────────────────────────────────────
-const HAGRID = { name: 'Hagrid', emoji: '🧑‍🌾', color: '#c98a4c' };
-const MCG = { name: 'Professor McGonagall', emoji: '🎩', color: '#9db4d0' };
-const DUMBLEDORE = { name: 'Professor Dumbledore', emoji: '🧙‍♂️', color: '#c9a84c' };
+const HAGRID = { key: 'hagrid', name: 'Hagrid', emoji: '🧑‍🌾', color: '#c98a4c' };
+const MCG = { key: 'mcgonagall', name: 'Professor McGonagall', emoji: '🎩', color: '#9db4d0' };
+const DUMBLEDORE = { key: 'dumbledore', name: 'Professor Dumbledore', emoji: '🧙‍♂️', color: '#c9a84c' };
 
 // Beat scripts are functions so {name} interpolates at play time.
 const BEATS = {
@@ -108,7 +108,7 @@ function typeLine(line) {
   fullText = interp(line.text);
   advanceEl.classList.add('hidden');
 
-  if (AudioEngine && line.text) Dialogue.speak(fullText); // no-ops unless voice on
+  if (AudioEngine && line.text) Dialogue.speak(fullText, line.key); // no-ops unless voice on
 
   // Typewriter — instant under reduced motion.
   const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
