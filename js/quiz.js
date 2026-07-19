@@ -44,12 +44,16 @@ function unlockExpert() {
   localStorage.setItem('hp_expert_unlocked', 'true');
 }
 
-export function updateWelcomeScreen() {
+// Expert lock/unlock state — lives on the Quick Quiz screen now, but the
+// elements always exist in the DOM, so this is safe to call on any "home"
+// transition too.
+export function updateQuickScreen() {
   const unlocked = isExpertUnlocked();
   const btn = document.getElementById('expert-btn');
   const icon = document.getElementById('expert-icon');
   const hint = document.getElementById('expert-hint');
   const banner = document.getElementById('unlock-banner');
+  if (!btn) return;
   if (unlocked) {
     btn.classList.remove('locked');
     icon.textContent = '⚡';
@@ -61,6 +65,13 @@ export function updateWelcomeScreen() {
     hint.classList.remove('hidden');
     banner.classList.add('hidden');
   }
+}
+
+// The splash ("home") callback used across every backToMenu / home transition.
+// Kept as the canonical home refresh; delegates the expert state so returning
+// home keeps the Quick screen current even though it's a sub-screen now.
+export function updateWelcomeScreen() {
+  updateQuickScreen();
 }
 
 // ─── HOUSES ──────────────────────────────────────────────────────────────────

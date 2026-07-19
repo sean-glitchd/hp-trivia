@@ -440,3 +440,38 @@ body.quill-mode, body.quill-mode * {
   .frog-card-flip.flipped .frog-card-flip-inner { transform: none !important; }
   .frog-card-back { display: none; } /* skip the flip: show the front directly */
 }
+
+/* ═══ Onboarding pass: splash portals + Quick Quiz screen ═══════════════════ */
+.splash-tagline { text-align: center; font-family: 'EB Garamond', serif; font-style: italic; font-size: 1.15rem; color: rgba(245,230,200,0.75); margin: 8px 0 30px; }
+.mode-portals { display: flex; gap: 18px; justify-content: center; margin-bottom: 26px; }
+.mode-portal {
+  flex: 1; max-width: 300px; min-height: 210px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  padding: 32px 22px; cursor: pointer; text-align: center;
+  background: linear-gradient(165deg, rgba(20,10,36,0.9), rgba(10,5,20,0.92));
+  border: 1px solid rgba(201,168,76,0.35); border-radius: 20px;
+  transition: transform 0.25s, box-shadow 0.3s, border-color 0.3s;
+  position: relative; overflow: hidden;
+}
+.mode-portal::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+  background: radial-gradient(circle at 50% 30%, rgba(240,208,128,0.18), transparent 60%);
+}
+.mode-portal:hover { transform: translateY(-5px); border-color: var(--accent, #c9a84c); box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 26px var(--accent-glow, rgba(240,208,128,0.35)); }
+.mode-portal:hover::after { opacity: 1; }
+.portal-crest { font-size: 3.4rem; filter: drop-shadow(0 3px 10px rgba(0,0,0,0.5)); }
+.portal-title { font-family: 'Cinzel Decorative', cursive; font-size: 1.3rem; color: var(--accent-light, #f0d080); line-height: 1.25; }
+.portal-sub { font-family: 'EB Garamond', serif; font-style: italic; font-size: 0.92rem; color: rgba(245,230,200,0.6); }
+.portal-journey .portal-crest { animation: portal-float 4s ease-in-out infinite; }
+.portal-quick .portal-crest { animation: portal-float 4s ease-in-out infinite 0.6s; }
+@keyframes portal-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+
+@media (max-width: 560px) {
+  .mode-portals { flex-direction: column; align-items: stretch; }
+  .mode-portal { max-width: none; min-height: 150px; flex-direction: row; justify-content: flex-start; gap: 16px; padding: 20px 22px; text-align: left; }
+  .portal-crest { font-size: 2.6rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .portal-journey .portal-crest, .portal-quick .portal-crest { animation: none !important; }
+  .mode-portal { transition: none !important; }
+}

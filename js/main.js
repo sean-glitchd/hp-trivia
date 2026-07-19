@@ -5,6 +5,7 @@ import { AudioEngine, initAudioListeners } from './audio.js';
 import { Snitch } from './snitch.js';
 import {
   updateWelcomeScreen,
+  updateQuickScreen,
   applyHouse,
   setHouse,
   startQuiz,
@@ -12,6 +13,7 @@ import {
   resultPrimary,
   resultSecondary,
   setQuickConfigDecorator,
+  switchScreen,
 } from './quiz.js';
 import { Journey } from './journey.js';
 import { Nav } from './nav.js';
@@ -39,8 +41,17 @@ document.querySelectorAll('.house-btn').forEach(btn => {
   btn.addEventListener('click', () => setHouse(house));
 });
 
-// ─── Journey hero CTA ────────────────────────────────────────────────────────
+// ─── Splash portals ──────────────────────────────────────────────────────────
 document.getElementById('journey-btn').addEventListener('click', (e) => Journey.enter(e));
+document.getElementById('quick-btn').addEventListener('click', () => {
+  AudioEngine.playClick();
+  updateQuickScreen();
+  switchScreen('screen-welcome', 'screen-quick');
+});
+document.getElementById('quick-back').addEventListener('click', () => {
+  AudioEngine.playClick();
+  switchScreen('screen-quick', 'screen-welcome', updateWelcomeScreen);
+});
 
 // ─── Difficulty buttons ──────────────────────────────────────────────────────
 document.querySelector('.diff-easy').addEventListener('click', (e) => startQuiz('easy', e));
