@@ -489,3 +489,60 @@ body.quill-mode, body.quill-mode * {
 .spell-hint-name { font-family: 'Cinzel', serif; color: var(--gold-light, #f0d080); }
 .spell-hint-confirm { color: var(--accent-light, #f0d080); font-style: italic; }
 @media (prefers-reduced-motion: reduce) { .spell-btn.spell-selected { transition: none !important; } .spell-hint { animation: none !important; } }
+
+/* ═══ Guide character: GBA-RPG pixel dialogue box (guide.js) ═════════════════ */
+.guide-box {
+  position: fixed; inset: 0; z-index: 360;
+  display: flex; align-items: flex-end; justify-content: center;
+  padding: 0 16px 22px; cursor: pointer;
+  background: rgba(6,3,14,0.55);
+}
+.guide-box.hidden { display: none; }
+.guide-panel {
+  position: relative; width: min(660px, 100%);
+  display: flex; align-items: flex-start; gap: 16px;
+  background: linear-gradient(180deg, #1a1030, #120a22);
+  color: var(--parchment, #f5e6c8);
+  /* chunky pixel frame: layered box-shadow steps + double border */
+  border: 3px solid #e8dcc0;
+  border-radius: 4px;
+  padding: 18px 20px 20px;
+  box-shadow: 0 0 0 3px #2a1a4a, 0 0 0 6px #e8dcc0, 0 14px 40px rgba(0,0,0,0.6);
+  image-rendering: pixelated;
+}
+.guide-portrait {
+  flex-shrink: 0; width: 56px; height: 56px;
+  display: flex; align-items: center; justify-content: center; font-size: 2rem;
+  background: rgba(255,255,255,0.06); border: 3px solid #c9a84c; border-radius: 4px;
+}
+.guide-content { flex: 1; min-width: 0; }
+.guide-name {
+  font-family: 'Cinzel', serif; font-variant: small-caps; font-weight: 600;
+  font-size: 0.9rem; letter-spacing: 0.06em; margin-bottom: 6px;
+}
+.guide-text {
+  font-family: 'EB Garamond', serif; font-size: 1.06rem; line-height: 1.5;
+  min-height: 3em; /* reserve space so the box doesn't jump as text types */
+}
+.guide-advance {
+  position: absolute; right: 16px; bottom: 12px;
+  color: var(--gold-light, #f0d080); font-size: 0.9rem;
+  animation: guide-bob 0.8s ease-in-out infinite;
+}
+.guide-advance.hidden { display: none; }
+@keyframes guide-bob { 0%,100%{ transform: translateY(0); opacity:0.6 } 50%{ transform: translateY(3px); opacity:1 } }
+.guide-skip {
+  position: absolute; top: 10px; right: 14px;
+  background: none; border: none; color: rgba(245,230,200,0.5);
+  font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.08em; cursor: pointer;
+}
+.guide-skip:hover { color: var(--gold-light, #f0d080); }
+
+@media (max-width: 480px) {
+  .guide-panel { gap: 12px; padding: 14px 16px 18px; }
+  .guide-portrait { width: 44px; height: 44px; font-size: 1.5rem; }
+  .guide-text { font-size: 0.98rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .guide-advance { animation: none !important; }
+}

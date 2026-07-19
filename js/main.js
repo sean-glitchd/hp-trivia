@@ -34,6 +34,7 @@ Snitch.init();
 Hedwig.init();
 Cards.init();
 Daily.init();
+Guide.init();
 
 // ─── House picker ────────────────────────────────────────────────────────────
 document.querySelectorAll('.house-btn').forEach(btn => {

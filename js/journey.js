@@ -14,6 +14,7 @@ import { Arsenal } from './arsenal.js';
 import { composeRoundHooks } from './abilities.js';
 import { Typing } from './typing.js';
 import { Cards } from './cards.js';
+import { Guide } from './guide.js';
 
 // Once-per-session set of years that have already run their typing challenge,
 // so the "Cast the spell!" interstitial fires at most once per year per visit.
@@ -505,7 +506,10 @@ function showIntro(kind, yearNum, lessonIdx, fromId = 'screen-year') {
     }).join('');
   document.getElementById('intro-begin').textContent =
     kind === 'exam' ? (isDuel ? 'Face Him' : 'Break the Seal') : 'Begin the Lesson';
-  switchScreen(fromId, 'screen-year-intro');
+  switchScreen(fromId, 'screen-year-intro', () => {
+    // First time the player reaches an exam, McGonagall explains the gate.
+    if (kind === 'exam' && !isDuel) Guide.playBeatOnce('first-exam');
+  });
 }
 
 function introBack() {
@@ -832,6 +836,8 @@ function renderCeremony() {
   document.getElementById('ceremony-master-name').textContent = Dialogue.getName();
   if (won) FX.confetti({ colors: [rows[0].color, '#f0d080', '#ffffff', '#c9a84c'], count: 90 });
   AudioEngine.playFanfare();
+  // Dumbledore's farewell caps the journey (once).
+  Guide.playBeatOnce('journey-complete');
 }
 
 // ─── SORTING CEREMONY ────────────────────────────────────────────────────────
@@ -999,7 +1005,8 @@ function revealHouse(house) {
     save(); // marks the journey as begun — the ceremony won't re-run
     refreshCTA();
     ensureUsedYear(1);
-    showIntro('lesson', 1, 0, 'screen-sorting');
+    // Hagrid's walkthrough plays once, right after Sorting, then into Year 1.
+    Guide.playBeatOnce('journey-intro', () => showIntro('lesson', 1, 0, 'screen-sorting'));
   });
 }
 
