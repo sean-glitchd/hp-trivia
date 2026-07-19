@@ -884,6 +884,22 @@ function needsSorting() {
   return !hasSavedJourney() || !Dialogue.hasName();
 }
 
+// Hand-drawn Sorting Hat — the films' weathered, droopy, patched pointed hat
+// (not a top hat). The .hat-mouth crease animates while the Hat deliberates.
+const SORTING_HAT_SVG = `
+<svg class="sorting-hat-svg" viewBox="0 0 120 122" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M8 94 Q60 74 112 94 Q96 108 60 108 Q24 108 8 94 Z" fill="#6b4f2c"/>
+  <path d="M31 96 Q28 62 42 40 Q52 23 70 16 Q86 11 90 25 Q92 37 79 45 Q88 53 83 68 Q78 87 89 96 Q60 88 31 96 Z"
+        fill="#8a6a3e" stroke="#5a4020" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M45 51 Q60 58 75 49" stroke="#5a4020" stroke-width="1.4" fill="none"/>
+  <path d="M38 72 Q60 81 82 69" stroke="#5a4020" stroke-width="1.4" fill="none"/>
+  <path d="M60 40 Q66 30 76 27" stroke="#a3855a" stroke-width="1.4" fill="none" opacity="0.7"/>
+  <rect x="50" y="59" width="11" height="9" rx="1.6" fill="#7a5a34" stroke="#5a4020" stroke-width="0.8" transform="rotate(-9 55 63)"/>
+  <path d="M43 63 Q48 58 54 63" stroke="#33240f" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <path d="M66 61 Q71 56 77 61" stroke="#33240f" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <path class="hat-mouth" d="M41 81 Q60 91 82 78" stroke="#33240f" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+</svg>`;
+
 function sortingEl() {
   return document.getElementById('sorting-content');
 }
@@ -895,7 +911,7 @@ function startSorting() {
 
 function renderNameStep(prefill) {
   sortingEl().innerHTML = `
-    <div class="sorting-hat-emoji">🎩</div>
+    <div class="sorting-hat-emoji">${SORTING_HAT_SVG}</div>
     <div class="sorting-hat-line">"The Sorting Hat asks your name…"</div>
     <input class="sorting-name-input" id="sorting-name-input" maxlength="20" placeholder="Your name" autocomplete="off" autocorrect="off">
     <button class="next-btn sorting-btn" id="sorting-name-next">That's me</button>`;
@@ -912,7 +928,7 @@ function renderNameStep(prefill) {
 
 function renderConfirmStep(name) {
   sortingEl().innerHTML = `
-    <div class="sorting-hat-emoji">🎩</div>
+    <div class="sorting-hat-emoji">${SORTING_HAT_SVG}</div>
     <div class="sorting-hat-line">"<em>${name}</em>, is it? Hmm…"</div>
     <div class="sorting-btn-row">
       <button class="play-again-btn" id="sorting-edit">Edit</button>
@@ -938,7 +954,7 @@ function startHatQuestions() {
 function renderHatQ(i) {
   const q = SORTING_QS[i];
   sortingEl().innerHTML = `
-    <div class="sorting-hat-emoji">🎩</div>
+    <div class="sorting-hat-emoji">${SORTING_HAT_SVG}</div>
     <div class="sorting-hat-line">"${q.q}"</div>
     <div class="sorting-options">
       ${q.options.map((o, j) => `<button class="option sorting-option" data-idx="${j}"><span class="option-letter">${'ABCD'[j]}</span><span>${o.t}</span></button>`).join('')}
@@ -964,7 +980,7 @@ function tallyHouse() {
 
 function deliberate() {
   sortingEl().innerHTML = `
-    <div class="sorting-hat-emoji sorting-hat-thinking">🎩</div>
+    <div class="sorting-hat-emoji sorting-hat-thinking">${SORTING_HAT_SVG}</div>
     <div class="sorting-hat-line" id="sorting-mutter">${MUTTER_LINES[0]}</div>`;
   AudioEngine.playDrumroll();
   let mi = 0;

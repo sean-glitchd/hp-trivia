@@ -268,13 +268,20 @@
 /* ── Sorting ceremony ───────────────────────────────────────────────────── */
 #screen-sorting { text-align: center; }
 #sorting-content { max-width: 460px; margin: 0 auto; padding-top: 12px; }
-.sorting-hat-emoji { font-size: 3.6rem; margin-bottom: 14px; filter: drop-shadow(0 0 18px rgba(201,168,76,0.35)); }
-.sorting-hat-thinking { animation: hat-wobble 0.7s ease-in-out infinite; }
+.sorting-hat-emoji { margin-bottom: 14px; display: flex; justify-content: center; }
+.sorting-hat-svg { width: 108px; height: auto; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5)) drop-shadow(0 0 16px rgba(201,168,76,0.25)); }
+.sorting-hat-thinking .sorting-hat-svg { animation: hat-wobble 0.7s ease-in-out infinite; transform-origin: 60px 108px; }
 @keyframes hat-wobble {
   0%, 100% { transform: rotate(-4deg); }
   50% { transform: rotate(4deg); }
 }
-@media (prefers-reduced-motion: reduce) { .sorting-hat-thinking { animation: none; } }
+/* The Hat's mouth crease opens and closes while it deliberates. */
+.hat-mouth { transform-box: fill-box; transform-origin: center; }
+.sorting-hat-thinking .hat-mouth { animation: hat-talk 0.36s ease-in-out infinite alternate; }
+@keyframes hat-talk { from { transform: scaleY(1); } to { transform: scaleY(2.4); } }
+@media (prefers-reduced-motion: reduce) {
+  .sorting-hat-thinking .sorting-hat-svg, .sorting-hat-thinking .hat-mouth { animation: none; }
+}
 .sorting-hat-line {
   font-family: 'EB Garamond', serif;
   font-style: italic;
