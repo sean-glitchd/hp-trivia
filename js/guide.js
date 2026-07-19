@@ -28,24 +28,25 @@ const HAGRID = { key: 'hagrid', name: 'Hagrid', emoji: '🧑‍🌾', color: '#c
 const MCG = { key: 'mcgonagall', name: 'Professor McGonagall', emoji: '🎩', color: '#9db4d0' };
 const DUMBLEDORE = { key: 'dumbledore', name: 'Professor Dumbledore', emoji: '🧙‍♂️', color: '#c9a84c' };
 
-// Beat scripts are functions so {name} interpolates at play time.
+// Beat scripts are functions so {name} interpolates at play time. `id` maps to
+// a pre-recorded clip at audio/voices/<id>.m4a (see scripts/generate-voices.mjs).
 const BEATS = {
   'journey-intro': () => [
-    { ...HAGRID, text: "Blimey, {name}! Welcome ter Hogwarts. I'm Hagrid — I'll show yeh the ropes." },
-    { ...HAGRID, text: "Yeh're here ter learn. Each Year has a few lessons — ten questions apiece. Get six right an' yeh pass." },
-    { ...HAGRID, text: "Finish all a Year's lessons an' yeh can sit the Final Exam. Pass that, an' yeh move up a Year." },
-    { ...HAGRID, text: "Yeh'll earn spells along the way. Tap one ter see what it does, then tap again ter cast it — handy in a tight spot." },
-    { ...HAGRID, text: "Every answer earns House Points fer the House Cup. An' keep yer eyes peeled — the Golden Snitch an' Hedwig turn up now an' then. Catch 'em fer a reward!" },
-    { ...HAGRID, text: "Right then, {name}. Off yeh go. Make us proud." },
+    { ...HAGRID, id: 'journey-intro-1', text: "Blimey, {name}! Welcome ter Hogwarts. I'm Hagrid — I'll show yeh the ropes." },
+    { ...HAGRID, id: 'journey-intro-2', text: "Yeh're here ter learn. Each Year has a few lessons — ten questions apiece. Get six right an' yeh pass." },
+    { ...HAGRID, id: 'journey-intro-3', text: "Finish all a Year's lessons an' yeh can sit the Final Exam. Pass that, an' yeh move up a Year." },
+    { ...HAGRID, id: 'journey-intro-4', text: "Yeh'll earn spells along the way. Tap one ter see what it does, then tap again ter cast it — handy in a tight spot." },
+    { ...HAGRID, id: 'journey-intro-5', text: "Every answer earns House Points fer the House Cup. An' keep yer eyes peeled — the Golden Snitch an' Hedwig turn up now an' then. Catch 'em fer a reward!" },
+    { ...HAGRID, id: 'journey-intro-6', text: "Right then, {name}. Off yeh go. Make us proud." },
   ],
   'first-exam': () => [
-    { ...MCG, text: "This is your Final Exam, {name} — twenty questions, and fourteen correct to pass. Do concentrate." },
+    { ...MCG, id: 'first-exam-1', text: "This is your Final Exam, {name} — twenty questions, and fourteen correct to pass. Do concentrate." },
   ],
   'first-year-done': () => [
-    { ...HAGRID, text: "Yeh did it, {name}! A whole Year behind yeh. Onwards — it only gets more int'restin' from here." },
+    { ...HAGRID, id: 'first-year-done-1', text: "Yeh did it, {name}! A whole Year behind yeh. Onwards — it only gets more int'restin' from here." },
   ],
   'journey-complete': () => [
-    { ...DUMBLEDORE, text: "Seven years, {name}. You have learned that our choices reveal who we truly are. Hogwarts will always be here to welcome you home." },
+    { ...DUMBLEDORE, id: 'journey-complete-1', text: "Seven years, {name}. You have learned that our choices reveal who we truly are. Hogwarts will always be here to welcome you home." },
   ],
 };
 
@@ -108,7 +109,7 @@ function typeLine(line) {
   fullText = interp(line.text);
   advanceEl.classList.add('hidden');
 
-  if (AudioEngine && line.text) Dialogue.speak(fullText, line.key); // no-ops unless voice on
+  if (AudioEngine && line.text) Dialogue.speakLine({ id: line.id, char: line.key, text: fullText }); // no-ops unless voice on
 
   // Typewriter — instant under reduced motion.
   const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;

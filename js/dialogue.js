@@ -19,58 +19,61 @@ export const CHARACTERS = {
 
 // ─── LINES ───────────────────────────────────────────────────────────────────
 // {name} is interpolated at display time. Multiple lines may share a trigger —
-// one is picked at random each time.
+// one is picked at random each time. `id` maps to a pre-recorded voice clip at
+// audio/voices/<id>.m4a (see scripts/generate-voices.mjs); speakLine() plays
+// that clip and falls back to tuned Web Speech (with the real {name}) if it's
+// missing or fails to load.
 export const LINES = [
   // grade O — perfect/near-perfect (100%)
-  { trigger: 'grade-o', char: 'mcgonagall', text: 'Outstanding, {name}. I see no reason whatsoever to hide my delight.' },
-  { trigger: 'grade-o', char: 'dumbledore', text: 'I have rarely seen such a performance, {name}. Curious. Very well done indeed.' },
+  { id: 'grade-o-mcgonagall', trigger: 'grade-o', char: 'mcgonagall', text: 'Outstanding, {name}. I see no reason whatsoever to hide my delight.' },
+  { id: 'grade-o-dumbledore', trigger: 'grade-o', char: 'dumbledore', text: 'I have rarely seen such a performance, {name}. Curious. Very well done indeed.' },
   // grade E — 80-99%
-  { trigger: 'grade-e', char: 'mcgonagall', text: 'Exceeds Expectations. Keep this up, {name}, and your house will be very proud.' },
-  { trigger: 'grade-e', char: 'hagrid', text: 'Knew yeh had it in yeh, {name}! Great one, that was!' },
+  { id: 'grade-e-mcgonagall', trigger: 'grade-e', char: 'mcgonagall', text: 'Exceeds Expectations. Keep this up, {name}, and your house will be very proud.' },
+  { id: 'grade-e-hagrid', trigger: 'grade-e', char: 'hagrid', text: 'Knew yeh had it in yeh, {name}! Great one, that was!' },
   // grade A — 60-79%
-  { trigger: 'grade-a', char: 'mcgonagall', text: 'Acceptable, {name}. Which, at Hogwarts, is no small thing. More library, less Quidditch.' },
-  { trigger: 'grade-a', char: 'nick', text: 'Perfectly respectable, {name}. Not everyone can be top of the class — or keep their head.' },
+  { id: 'grade-a-mcgonagall', trigger: 'grade-a', char: 'mcgonagall', text: 'Acceptable, {name}. Which, at Hogwarts, is no small thing. More library, less Quidditch.' },
+  { id: 'grade-a-nick', trigger: 'grade-a', char: 'nick', text: 'Perfectly respectable, {name}. Not everyone can be top of the class — or keep their head.' },
   // grade P — 40-59%
-  { trigger: 'grade-p', char: 'snape', text: 'Poor. I confess myself… entirely unsurprised, {name}.' },
-  { trigger: 'grade-p', char: 'mcgonagall', text: 'Poor, {name}. I expect better — because I know you are capable of better.' },
+  { id: 'grade-p-snape', trigger: 'grade-p', char: 'snape', text: 'Poor. I confess myself… entirely unsurprised, {name}.' },
+  { id: 'grade-p-mcgonagall', trigger: 'grade-p', char: 'mcgonagall', text: 'Poor, {name}. I expect better — because I know you are capable of better.' },
   // grade D — 20-39%
-  { trigger: 'grade-d', char: 'snape', text: 'Dreadful. Tell me, {name} — did you open the book at all, or merely admire the cover?' },
+  { id: 'grade-d-snape', trigger: 'grade-d', char: 'snape', text: 'Dreadful. Tell me, {name} — did you open the book at all, or merely admire the cover?' },
   // grade T — below 20%
-  { trigger: 'grade-t', char: 'snape', text: 'Troll. Astonishing, {name}. I did not think it could be done.' },
-  { trigger: 'grade-t', char: 'hagrid', text: "Don' worry, {name}. Firs' tries never count. Have a rock cake an' go again." },
+  { id: 'grade-t-snape', trigger: 'grade-t', char: 'snape', text: 'Troll. Astonishing, {name}. I did not think it could be done.' },
+  { id: 'grade-t-hagrid', trigger: 'grade-t', char: 'hagrid', text: "Don' worry, {name}. Firs' tries never count. Have a rock cake an' go again." },
 
   // streaks
-  { trigger: 'streak-3', char: 'hagrid', text: 'Three in a row! Yer a natural, {name}, no mistake!' },
-  { trigger: 'streak-5', char: 'mcgonagall', text: 'Five consecutive correct answers. I am rarely impressed, {name}. Consider me impressed.' },
-  { trigger: 'streak-8', char: 'dumbledore', text: 'Remarkable, {name}. Simply remarkable.' },
+  { id: 'streak-3-hagrid', trigger: 'streak-3', char: 'hagrid', text: 'Three in a row! Yer a natural, {name}, no mistake!' },
+  { id: 'streak-5-mcgonagall', trigger: 'streak-5', char: 'mcgonagall', text: 'Five consecutive correct answers. I am rarely impressed, {name}. Consider me impressed.' },
+  { id: 'streak-8-dumbledore', trigger: 'streak-8', char: 'dumbledore', text: 'Remarkable, {name}. Simply remarkable.' },
 
   // first wrong answer of a round
-  { trigger: 'first-wrong', char: 'nick', text: "Don't lose your head over one mistake, {name} — I speak from experience." },
-  { trigger: 'first-wrong', char: 'snape', text: 'Wrong. Do concentrate, {name}.' },
+  { id: 'first-wrong-nick', trigger: 'first-wrong', char: 'nick', text: "Don't lose your head over one mistake, {name} — I speak from experience." },
+  { id: 'first-wrong-snape', trigger: 'first-wrong', char: 'snape', text: 'Wrong. Do concentrate, {name}.' },
 
   // year pass / fail
-  { trigger: 'year-pass', char: 'mcgonagall', text: 'You have passed the year, {name}. Report to the feast — and do try not to look smug.' },
-  { trigger: 'year-fail', char: 'mcgonagall', text: 'You shall repeat the year, {name}. There is no shame in that — only in giving up.' },
+  { id: 'year-pass-mcgonagall', trigger: 'year-pass', char: 'mcgonagall', text: 'You have passed the year, {name}. Report to the feast — and do try not to look smug.' },
+  { id: 'year-fail-mcgonagall', trigger: 'year-fail', char: 'mcgonagall', text: 'You shall repeat the year, {name}. There is no shame in that — only in giving up.' },
 
   // O.W.L.s intro
-  { trigger: 'owl-intro', char: 'mcgonagall', text: 'These are your O.W.L.s, {name}. I expect nothing less than your very best.' },
+  { id: 'owl-intro-mcgonagall', trigger: 'owl-intro', char: 'mcgonagall', text: 'These are your O.W.L.s, {name}. I expect nothing less than your very best.' },
 
   // perfect round (10/10)
-  { trigger: 'perfect-round', char: 'dumbledore', text: 'Ten out of ten, {name}. I award you the rarest thing I have — my full attention.' },
+  { id: 'perfect-round-dumbledore', trigger: 'perfect-round', char: 'dumbledore', text: 'Ten out of ten, {name}. I award you the rarest thing I have — my full attention.' },
 
   // sorting
-  { trigger: 'sorting-greet', char: 'hat', text: 'Ah — {name}. Plenty in this head, I see. Let us look closer…' },
+  { id: 'sorting-greet-hat', trigger: 'sorting-greet', char: 'hat', text: 'Ah — {name}. Plenty in this head, I see. Let us look closer…' },
 
   // the duel (Year 7)
-  { trigger: 'duel-start', char: 'voldemort', text: 'So… {name}. They send a child to face Lord Voldemort.' },
-  { trigger: 'duel-win', char: 'dumbledore', text: 'It is our choices, {name}, that show what we truly are. You chose well.' },
-  { trigger: 'duel-loss', char: 'voldemort', text: 'Crawl back to your castle, {name}. We shall finish this another day.' },
-  { trigger: 'duel-hit', char: 'voldemort', text: 'You DARE?!' },
-  { trigger: 'duel-hit', char: 'voldemort', text: 'A lucky strike, {name}. Nothing more.' },
+  { id: 'duel-start-voldemort', trigger: 'duel-start', char: 'voldemort', text: 'So… {name}. They send a child to face Lord Voldemort.' },
+  { id: 'duel-win-dumbledore', trigger: 'duel-win', char: 'dumbledore', text: 'It is our choices, {name}, that show what we truly are. You chose well.' },
+  { id: 'duel-loss-voldemort', trigger: 'duel-loss', char: 'voldemort', text: 'Crawl back to your castle, {name}. We shall finish this another day.' },
+  { id: 'duel-hit-voldemort-1', trigger: 'duel-hit', char: 'voldemort', text: 'You DARE?!' },
+  { id: 'duel-hit-voldemort-2', trigger: 'duel-hit', char: 'voldemort', text: 'A lucky strike, {name}. Nothing more.' },
 
   // legendary Chocolate Frog card reveal (cards.js)
-  { trigger: 'card-legendary', char: 'dumbledore', text: 'A legendary card, {name}? How extraordinary. Chocolate Frogs never cease to surprise even me.' },
-  { trigger: 'card-legendary', char: 'hagrid', text: 'Blimey, {name} — I haven\'t seen a card like that since I was a boy!' },
+  { id: 'card-legendary-dumbledore', trigger: 'card-legendary', char: 'dumbledore', text: 'A legendary card, {name}? How extraordinary. Chocolate Frogs never cease to surprise even me.' },
+  { id: 'card-legendary-hagrid', trigger: 'card-legendary', char: 'hagrid', text: 'Blimey, {name} — I haven\'t seen a card like that since I was a boy!' },
 ];
 
 const SEAL_COLOR = { O: '#c9a84c', E: '#4caf7a', A: '#6c9fd8', P: '#f0a060', D: '#e0703c', T: '#dc3c3c' };
@@ -162,6 +165,7 @@ export function say(trigger, ctx) {
   if (!line) return null;
   const resolved = { ...line, text: interpolate(line.text, ctx) };
   showCard(resolved);
+  speakLine(resolved);
   return resolved;
 }
 
@@ -176,6 +180,7 @@ export function quip(trigger, ctx) {
   if (!line) return null;
   const resolved = { ...line, text: interpolate(line.text, ctx) };
   showCard(resolved);
+  speakLine(resolved);
   quipsThisRound++;
   questionsSinceLastQuip = 0;
   return resolved;
@@ -209,7 +214,7 @@ export function renderGradeSeal(score, total) {
     const char = CHARACTERS[line.char] || CHARACTERS.hat;
     const text = interpolate(line.text, {});
     commentEl.innerHTML = `<span class="grade-line-char" style="color:${char.color}">${char.emoji} ${char.name}</span><span class="grade-line-text">"${text}"</span>`;
-    speak(text, line.char);
+    speakLine({ id: line.id, char: line.char, text });
   } else if (commentEl) {
     commentEl.textContent = '';
   }
@@ -280,7 +285,46 @@ export function speak(text, characterKey = 'default') {
   } catch (e) { /* unsupported or blocked — no-op */ }
 }
 
+// ─── pre-recorded voice clips (audio/voices/<id>.m4a) ───────────────────────
+// Real character audio, generated offline via scripts/generate-voices.mjs
+// (macOS `say` + afconvert — no API keys, no network at runtime). speakLine()
+// tries the clip first and falls back to tuned Web Speech (with the player's
+// actual name, since the clips are recorded name-free) if it's missing, still
+// generating, or fails to load — so every line stays sayable even before its
+// clip exists.
+let currentVoiceAudio = null;
+
+function stopVoiceAudio() {
+  if (currentVoiceAudio) {
+    try { currentVoiceAudio.pause(); } catch (e) { /* ignore */ }
+    currentVoiceAudio = null;
+  }
+}
+
+export function speakLine(line) {
+  if (!line || !line.text) return;
+  if (!isVoiceOn()) return;
+  if (!AudioEngine.enabled) return;
+  stopVoiceAudio();
+  if (!line.id) { speak(line.text, line.char); return; }
+  try {
+    const audio = new Audio(`audio/voices/${line.id}.m4a`);
+    audio.volume = AudioEngine.getVolume ? AudioEngine.getVolume() : 1;
+    let fellBack = false;
+    const fallback = () => {
+      if (fellBack) return;
+      fellBack = true;
+      if (currentVoiceAudio === audio) currentVoiceAudio = null;
+      speak(line.text, line.char);
+    };
+    audio.addEventListener('error', fallback);
+    currentVoiceAudio = audio;
+    audio.play().catch(fallback);
+  } catch (e) { speak(line.text, line.char); }
+}
+
 export function cancelSpeech() {
+  stopVoiceAudio();
   if (!('speechSynthesis' in window)) return;
   try { window.speechSynthesis.cancel(); } catch (e) { /* no-op */ }
 }

@@ -940,8 +940,7 @@ function renderConfirmStep(name) {
   });
   document.getElementById('sorting-confirm').addEventListener('click', () => {
     AudioEngine.playClick();
-    const line = Dialogue.say('sorting-greet');
-    if (line) Dialogue.speak(line.text, line.char);
+    Dialogue.say('sorting-greet'); // now speaks on its own (pre-recorded clip or fallback)
     startHatQuestions();
   });
 }
