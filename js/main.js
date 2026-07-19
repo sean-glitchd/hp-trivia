@@ -24,6 +24,7 @@ import { Cards } from './cards.js';
 import { Daily } from './daily.js';
 import { Hedwig } from './hedwig.js';
 import { SPELLS } from './arsenal.js';
+import { Guide } from './guide.js';
 
 // ─── FX / sky / cursor init (must run before other listeners use FX) ────────
 FX.init();
