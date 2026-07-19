@@ -9,11 +9,15 @@ export const AudioEngine = {
   musicTimer: null, nextNoteTime: 0, step: 0,
   _pattern: null, _stepDur: 0.42, _droneFreq: 164.81, _droneEvery: 16, // scheduler override slot — duel uses this too
   duelActive: false, _preDuel: null,
+  // Master volume 0–1 (persisted). Scales the synth graph via masterGain, the
+  // Hedwig's Theme <audio> (outside the graph), and speech (read by dialogue.js).
+  _volume: (() => { const v = parseFloat(localStorage.getItem('hp_volume')); return isNaN(v) ? 1 : Math.max(0, Math.min(1, v)); })(),
 
   init() {
     if (this.ctx) return;
     this.ctx = new (window.AudioContext || window.webkitAudioContext)();
     this.masterGain = this.ctx.createGain();
+    this.masterGain.gain.value = this._volume;
     this.masterGain.connect(this.ctx.destination);
     this.musicGain = this.ctx.createGain();
     this.musicGain.gain.value = 0.055;
@@ -21,6 +25,14 @@ export const AudioEngine = {
     this.sfxGain = this.ctx.createGain();
     this.sfxGain.gain.value = 0.25;
     this.sfxGain.connect(this.masterGain);
+  },
+
+  getVolume() { return this._volume; },
+  setVolume(v) {
+    this._volume = Math.max(0, Math.min(1, v));
+    try { localStorage.setItem('hp_volume', String(this._volume)); } catch (e) { /* ignore */ }
+    if (this.masterGain) this.masterGain.gain.value = this._volume;
+    if (this.themeAudio) this.themeAudio.volume = this._volume * 0.5;
   },
 
   ensureRunning() {
@@ -80,7 +92,7 @@ export const AudioEngine = {
     if (!this.themeAudio) {
       this.themeAudio = new Audio('audio/hedwigs-theme.mp3');
       this.themeAudio.loop = true;
-      this.themeAudio.volume = 0.35;
+      this.themeAudio.volume = this._volume * 0.5;
       this.themeAudio.addEventListener('error', () => {
         this.themeFailed = true;
         this.track = 'ambient';

@@ -96,6 +96,9 @@ resultBtns[1].addEventListener('click', () => resultSecondary());
 // ─── Sound controls ──────────────────────────────────────────────────────────
 document.getElementById('music-toggle').addEventListener('click', () => AudioEngine.toggle());
 document.getElementById('track-toggle').addEventListener('click', () => AudioEngine.switchTrack());
+const volumeSlider = document.getElementById('volume-slider');
+volumeSlider.value = String(AudioEngine.getVolume());
+volumeSlider.addEventListener('input', (e) => AudioEngine.setVolume(parseFloat(e.target.value)));
 
 // ─── Autoplay resume on first interaction ────────────────────────────────────
 initAudioListeners();

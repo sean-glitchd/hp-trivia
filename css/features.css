@@ -575,3 +575,24 @@ body.quill-mode, body.quill-mode * {
   .gesture-overlay { transition: none !important; }
   #gesture-canvas.gesture-shake { animation: none !important; }
 }
+
+/* ═══ Master volume slider (in .sound-controls) ═════════════════════════════ */
+.volume-slider {
+  -webkit-appearance: none; appearance: none;
+  width: 84px; height: 5px; border-radius: 4px; cursor: pointer;
+  background: rgba(201,168,76,0.28);
+  outline: none; margin-top: 2px;
+}
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--gold-light, #f0d080); border: 1px solid var(--gold, #c9a84c);
+  box-shadow: 0 0 6px rgba(240,208,128,0.6); cursor: pointer;
+}
+.volume-slider::-moz-range-thumb {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--gold-light, #f0d080); border: 1px solid var(--gold, #c9a84c);
+  box-shadow: 0 0 6px rgba(240,208,128,0.6); cursor: pointer;
+}
+.volume-slider::-moz-range-track { height: 5px; border-radius: 4px; background: rgba(201,168,76,0.28); }
+@media (max-width: 480px) { .volume-slider { width: 64px; } }

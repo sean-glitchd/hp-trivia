@@ -232,6 +232,7 @@ export function speak(text) {
     const gb = voices.find(v => /en-GB/i.test(v.lang)) || voices.find(v => /^en/i.test(v.lang));
     if (gb) utt.voice = gb;
     utt.rate = 0.95;
+    utt.volume = AudioEngine.getVolume ? AudioEngine.getVolume() : 1;
     window.speechSynthesis.speak(utt);
   } catch (e) { /* unsupported or blocked — no-op */ }
 }
