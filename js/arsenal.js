@@ -359,6 +359,14 @@ function render() {
 }
 
 // ─── public API ──────────────────────────────────────────────────────────────
+// Wipe the persistent inventory (including the one-time starter-kit flag) so a
+// full journey reset re-grants the kit and re-earns spells from scratch.
+function reset() {
+  inv = freshInv();
+  save();
+  render();
+}
+
 export const Arsenal = {
   beginRound,
   onQuestionShown,
@@ -370,4 +378,5 @@ export const Arsenal = {
   grantStarterKit,
   onSnitchCaught,
   render,
+  reset,
 };

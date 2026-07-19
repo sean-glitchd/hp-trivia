@@ -177,4 +177,11 @@ export const Guide = {
   play,
 
   isSeen(beatId) { return seenSet.has(beatId); },
+
+  // Clear all seen-beat flags (in-memory + storage) so a full journey reset
+  // replays the walkthrough in the same session, no refresh needed.
+  resetSeen() {
+    seenSet = new Set();
+    try { localStorage.removeItem(KEY); } catch (e) { /* ignore */ }
+  },
 };
