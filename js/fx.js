@@ -399,8 +399,11 @@ export const FX = {
 
   // ─── emitters ────────────────────────────────────────────────────────────
 
-  trail(x, y, vx = 0, vy = 0) {
+  // color: optional override (e.g. cursor.js's ink-blue quill trail while
+  // body.quill-mode is active) — defaults to the current house accent.
+  trail(x, y, vx = 0, vy = 0, color) {
     if (this.reduced) return;
+    const rgb = color ? (parseColor(color, accentColor) || accentColor) : accentColor;
     const count = Math.random() < 0.5 ? 1 : 2;
     for (let i = 0; i < count; i++) {
       const p = alloc();
@@ -417,7 +420,7 @@ export const FX = {
       p.alpha = 1;
       p.kind = 'spark';
       p.spin = 0;
-      setColor(p, accentColor);
+      setColor(p, rgb);
     }
   },
 
@@ -474,6 +477,27 @@ export const FX = {
       p.spin = 0;
       setColor(p, rgb);
     }
+  },
+
+  // Single pooled spark — used by duel.js's beam heads (1-2 calls/frame while
+  // a beam is in flight). Thin wrapper over the same pool as trail()/burst(),
+  // just parameterized by caller-supplied velocity/color instead of a fixed
+  // outward-radial pattern, so a beam's head can leave a directional trail.
+  spark(x, y, { vx = 0, vy = 0, color, size = 1.6, life = 0.3 } = {}) {
+    if (this.reduced) return;
+    const rgb = parseColor(color, accentColor) || accentColor;
+    const p = alloc();
+    if (!p) return;
+    p.x = x; p.y = y;
+    p.vx = vx; p.vy = vy;
+    p.gravity = 20;
+    p.drag = 0.95;
+    p.maxLife = p.life = life;
+    p.size = size;
+    p.alpha = 1;
+    p.kind = 'spark';
+    p.spin = 0;
+    setColor(p, rgb);
   },
 
   fizzle(x, y) {

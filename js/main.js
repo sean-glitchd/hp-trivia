@@ -8,11 +8,20 @@ import {
   applyHouse,
   setHouse,
   startQuiz,
-  useFiftyFifty,
   nextQuestion,
-  replayDifficulty,
-  backToMenu,
+  resultPrimary,
+  resultSecondary,
+  setQuickConfigDecorator,
 } from './quiz.js';
+import { Journey } from './journey.js';
+import { Nav } from './nav.js';
+import { initVoiceToggle, cancelSpeech, dismissCard } from './dialogue.js';
+import { Arsenal } from './arsenal.js';
+import { composeRoundHooks } from './abilities.js';
+import { Cards } from './cards.js';
+import { Daily } from './daily.js';
+import { Hedwig } from './hedwig.js';
+import { SPELLS } from './arsenal.js';
 
 // ─── FX / sky / cursor init (must run before other listeners use FX) ────────
 FX.init();
@@ -20,12 +29,18 @@ initSky();
 initCursor();
 initTilt();
 Snitch.init();
+Hedwig.init();
+Cards.init();
+Daily.init();
 
 // ─── House picker ────────────────────────────────────────────────────────────
 document.querySelectorAll('.house-btn').forEach(btn => {
   const house = btn.dataset.house || null;
   btn.addEventListener('click', () => setHouse(house));
 });
+
+// ─── Journey hero CTA ────────────────────────────────────────────────────────
+document.getElementById('journey-btn').addEventListener('click', (e) => Journey.enter(e));
 
 // ─── Difficulty buttons ──────────────────────────────────────────────────────
 document.querySelector('.diff-easy').addEventListener('click', (e) => startQuiz('easy', e));
@@ -34,14 +49,36 @@ document.querySelector('.diff-hard').addEventListener('click', (e) => startQuiz(
 document.querySelector('.diff-mixed').addEventListener('click', (e) => startQuiz('mixed', e));
 document.getElementById('expert-btn').addEventListener('click', (e) => startQuiz('expert', e));
 
-// ─── Lifeline / next question ────────────────────────────────────────────────
-document.getElementById('ll-btn').addEventListener('click', () => useFiftyFifty());
+// ─── Next question ───────────────────────────────────────────────────────────
 document.getElementById('next-btn').addEventListener('click', () => nextQuestion());
+
+// ─── Arsenal + house abilities (quick play) ──────────────────────────────────
+// Quick-play rounds get a round-scoped free Obliviate (the legacy 50/50), plus
+// any persistent charges and the chosen house's passive. The snitch's reward
+// now flows through the arsenal (round-scoped Obliviate top-up, cap 2 — same as
+// the old 50/50 restore).
+setQuickConfigDecorator((base) => composeRoundHooks(base, { freeObliviate: true }));
+Snitch.setRewardCallback(() => Arsenal.onSnitchCaught());
+
+// Hedwig's letter: 70% a random spell charge, 30% a Chocolate Frog card.
+// The callback performs the reward and returns the line shown in the letter.
+Hedwig.setLetterCallback(() => {
+  if (Math.random() < 0.7) {
+    const id = Arsenal.grantRandom();
+    return `A spell charge flutters out: ${SPELLS[id] ? SPELLS[id].glyph + ' ' + SPELLS[id].name : 'a charge'}!`;
+  }
+  const card = Cards.awardRoll('common');
+  return `Tucked inside: a Chocolate Frog card — ${card ? card.emoji + ' ' + card.name : 'a new card'}!`;
+});
+
+// ─── Daily Prophet + Gallery entry buttons ───────────────────────────────────
+document.getElementById('daily-btn')?.addEventListener('click', (e) => Daily.open(e));
+document.getElementById('gallery-btn')?.addEventListener('click', () => Cards.openGallery());
 
 // ─── Result screen buttons ───────────────────────────────────────────────────
 const resultBtns = document.querySelectorAll('.result-btns .play-again-btn');
-resultBtns[0].addEventListener('click', () => replayDifficulty());
-resultBtns[1].addEventListener('click', () => backToMenu());
+resultBtns[0].addEventListener('click', () => resultPrimary());
+resultBtns[1].addEventListener('click', () => resultSecondary());
 
 // ─── Sound controls ──────────────────────────────────────────────────────────
 document.getElementById('music-toggle').addEventListener('click', () => AudioEngine.toggle());
@@ -75,3 +112,12 @@ document.addEventListener('keydown', (e) => {
 updateWelcomeScreen();
 applyHouse();
 AudioEngine.updateButtons();
+Journey.init();
+Nav.init();
+Nav.setHomeCallback(() => {
+  cancelSpeech();
+  dismissCard();
+  updateWelcomeScreen();
+  Journey.refreshCTA();
+});
+initVoiceToggle();

@@ -31,8 +31,11 @@ export function initCursor() {
       const vy = dy / dt;
 
       accum += dist;
+      // Ink-blue tint while a typing overlay (typing.js) is open — the quill
+      // cursor gets its own trail color instead of the house-accent sparks.
+      const quill = document.body.classList.contains('quill-mode');
       while (accum >= TRAIL_STEP) {
-        FX.trail(x, y, vx, vy);
+        FX.trail(x, y, vx, vy, quill ? '#6a8fd8' : undefined);
         accum -= TRAIL_STEP;
       }
 

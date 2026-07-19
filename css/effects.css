@@ -72,6 +72,9 @@
     .toast { transition: opacity 0.2s ease; }
   }
 
+  /* ── Forgiven answer (Hufflepuff-style adjudicate 'forgiven' verdict) ────── */
+  .option.forgiven { border-color: rgba(230,170,60,0.85) !important; box-shadow: 0 0 10px rgba(230,170,60,0.35); }
+
   /* ── Wand cursor ───────────────────────────────────────────────────────── */
   @media (pointer: fine) {
     body {

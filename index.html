@@ -8,6 +8,8 @@
 <link rel="stylesheet" href="css/base.css?v=2">
 <link rel="stylesheet" href="css/components.css?v=2">
 <link rel="stylesheet" href="css/effects.css?v=2">
+<link rel="stylesheet" href="css/journey.css?v=2">
+<link rel="stylesheet" href="css/features.css?v=4">
 </head>
 <body>
 
@@ -15,6 +17,7 @@
 
 <div class="sound-controls">
   <button id="music-toggle" class="sound-btn" aria-pressed="false" aria-label="Toggle sound">🔇</button>
+  <button id="voice-toggle" class="sound-btn" aria-pressed="false" aria-label="Toggle spoken voice">🗣️</button>
   <button id="track-toggle" class="sound-btn track-btn hidden" aria-label="Switch music track">🎵 Theme</button>
 </div>
 
@@ -38,6 +41,13 @@
       <button class="house-btn" data-house="hufflepuff">🦡 Hufflepuff</button>
       <button class="house-btn" data-house="">✨ No allegiance</button>
     </div>
+
+    <button class="journey-cta-btn" id="journey-btn">
+      <span class="journey-cta-title" id="journey-btn-label">Begin Your Journey</span>
+      <span class="journey-cta-sub" id="journey-btn-sub">Seven years of Hogwarts await</span>
+    </button>
+
+    <div class="mode-divider"><div class="divider-line"></div><span>or take a quick quiz</span><div class="divider-line"></div></div>
 
     <div class="diff-grid">
       <button class="diff-btn diff-easy">
@@ -79,6 +89,19 @@
     <div class="unlock-banner hidden" id="unlock-banner">
       🔓 Expert mode unlocked — if you dare.
     </div>
+
+    <div class="welcome-extras">
+      <button class="extra-btn" id="daily-btn">
+        <span class="extra-dot hidden" id="daily-dot"></span>
+        <span class="extra-glyph">🗞️</span>
+        <span class="extra-label">Daily Prophet</span>
+      </button>
+      <button class="extra-btn" id="gallery-btn">
+        <span class="extra-glyph">🐸</span>
+        <span class="extra-label">Frog Cards</span>
+        <span class="extra-count" id="gallery-count">0/30</span>
+      </button>
+    </div>
   </div>
 
   <!-- Quiz Screen -->
@@ -89,8 +112,26 @@
     </div>
     <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:10%"></div></div>
 
-    <div class="lifeline-bar">
-      <button class="ll-btn" id="ll-btn">⚡ 50 / 50 Lifeline</button>
+    <div id="duel-hud">
+      <div class="duel-side duel-side-player">
+        <span class="duel-side-label">You</span>
+        <span class="hp-pips" id="duel-player-pips">
+          <span class="hp-pip">✦</span><span class="hp-pip">✦</span><span class="hp-pip">✦</span><span class="hp-pip">✦</span><span class="hp-pip">✦</span>
+        </span>
+      </div>
+      <div class="duel-vs" aria-hidden="true">⚔️</div>
+      <div class="duel-side duel-side-vold">
+        <span class="duel-side-label"><span class="label-full">Tom Riddle</span><span class="label-short">Riddle</span></span>
+        <span class="hp-pips" id="duel-vold-pips">
+          <span class="hp-pip">☠</span><span class="hp-pip">☠</span><span class="hp-pip">☠</span><span class="hp-pip">☠</span><span class="hp-pip">☠</span>
+        </span>
+      </div>
+    </div>
+    <div id="duel-wraith-space" aria-hidden="true"></div>
+
+    <div class="lifeline-bar spell-bar-wrap">
+      <div class="house-chip hidden" id="house-chip"></div>
+      <div class="spell-bar" id="spell-bar"></div>
     </div>
 
     <div class="question-card" id="question-card">
@@ -122,14 +163,105 @@
       <div class="expert-unlocked-text">You've proven yourself a true Hogwarts scholar. Expert mode is now available from the main menu.</div>
     </div>
 
+    <div class="journey-result-banner hidden" id="journey-result-banner"></div>
+
     <div class="result-btns">
       <button class="play-again-btn">↩ Play Again</button>
       <button class="play-again-btn">⚡ Change Level</button>
     </div>
   </div>
 
+  <!-- Journey Map -->
+  <div id="screen-journey" class="screen hidden">
+    <div class="journey-header" id="journey-header">
+      <div class="journey-header-line" id="journey-header-line"></div>
+      <button class="name-edit-btn" id="journey-name-edit" aria-label="Edit your name">✎</button>
+    </div>
+    <div class="journey-map">
+      <svg id="journey-path-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+      <div id="journey-nodes"></div>
+    </div>
+    <div class="cup-panel">
+      <div class="cup-title">🏆 House Cup</div>
+      <div id="cup-bars"></div>
+    </div>
+    <button class="next-btn" id="journey-cta">Continue</button>
+    <button class="next-btn hidden" id="dumbledore-challenge-btn">🦉 Dumbledore's Challenge</button>
+    <div class="journey-links">
+      <button class="link-btn" id="journey-back">← The Great Hall</button>
+      <button class="link-btn danger" id="journey-reset">Reset journey</button>
+    </div>
+  </div>
+
+  <!-- Year Curriculum -->
+  <div id="screen-year" class="screen hidden">
+    <div class="year-title" id="year-title"></div>
+    <div class="year-flavor" id="year-flavor"></div>
+    <div class="year-progress" id="year-progress"></div>
+    <div class="lesson-list" id="lesson-list"></div>
+    <div class="journey-links">
+      <button class="link-btn" id="year-back">← Back to the map</button>
+    </div>
+  </div>
+
+  <!-- Year / Lesson Intro -->
+  <div id="screen-year-intro" class="screen hidden">
+    <div class="intro-numeral" id="intro-numeral"></div>
+    <div class="intro-year-name" id="intro-year-name"></div>
+    <div class="intro-lesson-name" id="intro-lesson-name"></div>
+    <div class="intro-flavor" id="intro-flavor"></div>
+    <div class="intro-chips" id="intro-chips"></div>
+    <button class="next-btn" id="intro-begin">Begin the Lesson</button>
+    <div class="journey-links">
+      <button class="link-btn" id="intro-back">← Back</button>
+    </div>
+  </div>
+
+  <!-- House Cup Ceremony -->
+  <div id="screen-ceremony" class="screen hidden">
+    <div class="ceremony-trophy">🏆</div>
+    <div class="ceremony-title">The Great Feast</div>
+    <div id="ceremony-standings"></div>
+    <div id="ceremony-verdict"></div>
+    <div class="master-card">
+      <div class="master-star">★</div>
+      <div class="master-title">Master of Magic</div>
+      <div id="ceremony-master-name"></div>
+    </div>
+    <div class="result-btns">
+      <button class="play-again-btn" id="ceremony-map-btn">🗺 Back to the Map</button>
+      <button class="play-again-btn" id="ceremony-home-btn">🏰 The Great Hall</button>
+    </div>
+  </div>
+
+  <!-- Sorting Ceremony -->
+  <div id="screen-sorting" class="screen hidden">
+    <div id="sorting-content"></div>
+  </div>
+
+  <!-- Daily Prophet -->
+  <div id="screen-daily" class="screen hidden">
+    <div class="prophet-masthead">The Daily Prophet</div>
+    <div class="prophet-date" id="prophet-date"></div>
+    <div class="prophet-body" id="prophet-body"></div>
+    <button class="link-btn" id="daily-back">← Back to the Entrance Hall</button>
+  </div>
+
+  <!-- Chocolate Frog Card Gallery -->
+  <div id="screen-gallery" class="screen hidden">
+    <div class="gallery-header">
+      <span class="gallery-title">Chocolate Frog Cards</span>
+      <span class="gallery-header-count" id="gallery-header-count">0/30</span>
+    </div>
+    <div class="gallery-grid" id="gallery-grid"></div>
+    <button class="link-btn" id="gallery-back">← Back to the Entrance Hall</button>
+  </div>
+
 </div>
 
-<script type="module" src="js/main.js"></script>
+<div id="house-reveal" class="house-reveal hidden"></div>
+<div id="avada-flash" aria-hidden="true"></div>
+
+<script type="module" src="js/main.js?v=7"></script>
 </body>
 </html>

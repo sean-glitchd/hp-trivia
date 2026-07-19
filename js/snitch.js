@@ -55,10 +55,25 @@ function pushTrail(px, py) {
   if (trailFilled < TRAIL_LEN) trailFilled++;
 }
 
+// A padded box around the question card that wander targets steer clear of,
+// so the snitch stops darting across the words the player is trying to read.
+function overlapsQuestionCard(px, py) {
+  const card = document.getElementById('question-card');
+  if (!card) return false;
+  const r = card.getBoundingClientRect();
+  const pad = 30;
+  return px > r.left - pad && px < r.right + pad && py > r.top - pad && py < r.bottom + pad;
+}
+
 function pickWanderTarget(t) {
   const w = window.innerWidth, h = window.innerHeight;
-  targetX = MARGIN + Math.random() * Math.max(1, w - 2 * MARGIN);
-  targetY = MARGIN + Math.random() * Math.max(1, h - 2 * MARGIN);
+  // Try a few times to land a target off the question card; give up gracefully.
+  for (let i = 0; i < 6; i++) {
+    const tx = MARGIN + Math.random() * Math.max(1, w - 2 * MARGIN);
+    const ty = MARGIN + Math.random() * Math.max(1, h - 2 * MARGIN);
+    if (!overlapsQuestionCard(tx, ty)) { targetX = tx; targetY = ty; break; }
+    targetX = tx; targetY = ty; // fallback keeps the last try if all overlap
+  }
   nextTargetAt = t + 0.4 + Math.random() * 0.5;
 }
 
@@ -72,7 +87,8 @@ function spawnVisit(t) {
   vx = 0; vy = 0; heading = 0;
   trailFilled = 0; trailHead = 0;
   state = 'visiting';
-  visitEndAt = t + 6 + Math.random() * 4;
+  // Shorter visits (5–7s) so the snitch is a quick treat, not a distraction.
+  visitEndAt = t + 5 + Math.random() * 2;
   dashActiveUntil = 0;
   nextDashAt = t + 1.5 + Math.random() * 1.5;
   pickWanderTarget(t);
@@ -99,7 +115,9 @@ function stepAI(dt, t) {
   if (state === 'visiting' && t >= nextDashAt && t >= dashActiveUntil) {
     dashActiveUntil = t + 0.3;
     nextDashAt = t + 1.6 + Math.random() * 1.0;
-    if (t - lastFlutterAt > 0.8) {
+    // Throttle the flutter SFX harder (2.5s) so a visiting snitch doesn't
+    // chirp over and over while the player is mid-question.
+    if (t - lastFlutterAt > 2.5) {
       AudioEngine.playFlutter();
       lastFlutterAt = t;
     }
@@ -251,5 +269,10 @@ export const Snitch = {
 
   setRewardCallback(fn) {
     rewardCallback = fn;
+  },
+
+  // Hedwig checks this so the two flyers never share the screen.
+  isActive() {
+    return quizActive && (state === 'visiting' || state === 'exiting');
   },
 };
