@@ -475,3 +475,17 @@ body.quill-mode, body.quill-mode * {
   .portal-journey .portal-crest, .portal-quick .portal-crest { animation: none !important; }
   .mode-portal { transition: none !important; }
 }
+
+/* ═══ Two-tap spell casting: selected state + hint ══════════════════════════ */
+.spell-btn.spell-selected { border-color: var(--gold-light, #f0d080); box-shadow: 0 0 16px rgba(240,208,128,0.6); transform: translateY(-2px); }
+.spell-hint {
+  text-align: center; margin: 2px auto 10px; max-width: 460px;
+  font-family: 'EB Garamond', serif; font-size: 0.86rem; line-height: 1.4;
+  color: rgba(245,230,200,0.82);
+  background: rgba(10,5,20,0.6); border: 1px solid rgba(201,168,76,0.28); border-radius: 10px;
+  padding: 8px 14px; animation: fade-in 0.2s ease;
+}
+.spell-hint.hidden { display: none; }
+.spell-hint-name { font-family: 'Cinzel', serif; color: var(--gold-light, #f0d080); }
+.spell-hint-confirm { color: var(--accent-light, #f0d080); font-style: italic; }
+@media (prefers-reduced-motion: reduce) { .spell-btn.spell-selected { transition: none !important; } .spell-hint { animation: none !important; } }

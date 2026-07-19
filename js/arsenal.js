@@ -151,12 +151,16 @@ function beginRound({ freeObliviate = false, persistentAllowed = true, duel = fa
   feArmedThisTurn = false;
   paArmedThisTurn = false;
   ttUsedThisRound = false;
+  selectedSpell = null;
+  setHint('');
   render();
 }
 
 function onQuestionShown() {
   eliminatorUsedThisQuestion = false;
   answeredThisQuestion = false;
+  selectedSpell = null;
+  setHint('');
   render();
 }
 
@@ -286,28 +290,53 @@ function computeState(id) {
 function reasonToast(id, reason) {
   const s = SPELLS[id];
   switch (reason) {
-    case 'empty': return `${s.glyph} No ${s.name} charges left.`;
-    case 'used': return 'Only one eliminator spell per question.';
-    case 'inapplicable': return `${s.name} can't be cast right now.`;
-    case 'armed': return `${s.name} is already armed.`;
+    case 'empty': return `${s.glyph} ${s.name} — ${s.desc}. (No charges left.)`;
+    case 'used': return 'Only one eliminator spell (Obliviate or Lumos) per question.';
+    case 'inapplicable': return `${s.glyph} ${s.name} — ${s.desc}. (Can't cast right now.)`;
+    case 'armed': return `${s.glyph} ${s.name} is already armed — ${s.desc}.`;
     default: return `${s.glyph} ${s.name}: ${s.desc}`;
   }
 }
 
+// Tap-to-select, tap-again-to-cast — so a spell never fires before you know
+// what it does. First tap on a spell selects it and shows its effect; a second
+// tap on the same spell casts. Tapping a disabled spell just explains it.
+let selectedSpell = null;
+
+function setHint(html) {
+  const hint = document.getElementById('spell-hint');
+  if (!hint) return;
+  if (html) { hint.innerHTML = html; hint.classList.remove('hidden'); }
+  else { hint.innerHTML = ''; hint.classList.add('hidden'); }
+}
+
 function onSpellClick(id, btnEl) {
+  const spell = SPELLS[id];
   const state = computeState(id);
   if (state.disabled) {
-    if (COARSE) showToast(reasonToast(id, state.reason));
+    showToast(reasonToast(id, state.reason)); // always explain, even when unusable
+    selectedSpell = null; setHint(''); render();
     return;
   }
+  if (selectedSpell !== id) {
+    // First tap: select + describe, do NOT cast.
+    selectedSpell = id;
+    AudioEngine.playClick();
+    setHint(`<span class="spell-hint-name">${spell.glyph} ${spell.name}</span> — ${spell.desc}. <span class="spell-hint-confirm">Tap again to cast.</span>`);
+    render();
+    return;
+  }
+  // Second tap on the same spell: cast it.
   AudioEngine.playClick();
   const ok = castSpell(id);
   if (ok) {
     const rect = btnEl.getBoundingClientRect();
-    FX.burst(rect.left + rect.width / 2, rect.top + rect.height / 2, { count: 18, color: SPELLS[id].color });
-  } else if (COARSE) {
+    FX.burst(rect.left + rect.width / 2, rect.top + rect.height / 2, { count: 18, color: spell.color });
+  } else {
     showToast(id === 'tt' ? '⏳ No question left to turn back to.' : reasonToast(id, 'empty'));
   }
+  selectedSpell = null;
+  setHint('');
   render();
 }
 
@@ -320,7 +349,7 @@ function render() {
     const state = computeState(id);
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'spell-btn' + (state.disabled ? ' spell-disabled' : '') + (state.armed ? ' spell-armed' : '');
+    btn.className = 'spell-btn' + (state.disabled ? ' spell-disabled' : '') + (state.armed ? ' spell-armed' : '') + (selectedSpell === id ? ' spell-selected' : '');
     btn.setAttribute('aria-disabled', String(state.disabled));
     btn.title = `${spell.name} — ${spell.desc}`;
     btn.innerHTML = `<span class="spell-glyph">${spell.glyph}</span><span class="spell-label">${spell.name}</span><span class="spell-count">${available(id)}</span>`;
