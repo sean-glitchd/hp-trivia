@@ -82,6 +82,9 @@ const LINES = [
   ['journey-intro-5', 'hagrid', "Every answer earns House Points fer the House Cup. An' keep yer eyes peeled — the Golden Snitch an' Hedwig turn up now an' then. Catch 'em fer a reward!"],
   ['journey-intro-6', 'hagrid', 'Right then. Off yeh go. Make us proud.'],
   ['first-year-done-1', 'hagrid', "Yeh did it! A whole Year behind yeh. Onwards — it only gets more int'restin' from here."],
+  ['quick-intro-1', 'hagrid', "Oh, just after a quick round, are yeh? Ten questions, pick yer difficulty, an' off yeh go."],
+  ['quick-intro-2', 'hagrid', "Keep an eye out fer the Golden Snitch an' Hedwig — catch 'em fer a bonus spell charge or two."],
+  ['quick-intro-3', 'hagrid', "An' if yeh declare a House up top, yeh'll get their special perk fer this round. Go on then — good luck!"],
 ];
 
 mkdirSync(OUT_DIR, { recursive: true });
@@ -92,6 +95,7 @@ for (const [id, char, text] of LINES) {
   if (!voiceId) { skipped++; continue; } // character not yet approved for ElevenLabs
   const mp3 = path.join(OUT_DIR, `${id}.mp3`);
   const m4a = path.join(OUT_DIR, `${id}.m4a`);
+  if (existsSync(m4a)) { skipped++; continue; } // already generated — avoid re-billing
   try {
     const audio = await tts(voiceId, text);
     writeFileSync(mp3, audio);
