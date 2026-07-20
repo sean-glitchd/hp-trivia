@@ -5,11 +5,32 @@
 
 import { AudioEngine } from './audio.js';
 
+// A hand-drawn portrait bust — the 🗝️/🧑‍🌾 emoji used before didn't read as
+// Hagrid at all. Same low-detail bezier-path style as the Sorting Hat SVG
+// (js/journey.js), sized to sit centered in a small circular/square avatar
+// slot: big dark bushy hair + beard framing a ruddy face, small peeking eyes.
+export const HAGRID_SVG = `
+<svg class="hagrid-svg" width="1em" height="1em" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M6 88 Q12 64 44 62 Q76 64 82 88 Z" fill="#4a3824"/>
+  <ellipse cx="44" cy="40" rx="21" ry="25" fill="#d99c6b"/>
+  <path d="M12 46 Q6 14 44 8 Q82 14 76 46 Q74 28 63 23 Q67 34 60 40 Q59 21 44 17 Q29 21 28 40 Q21 34 25 23 Q14 28 12 46 Z" fill="#2e2015"/>
+  <path d="M18 42 Q14 66 30 80 Q44 88 58 80 Q74 66 70 42 Q60 52 44 52 Q28 52 18 42 Z" fill="#362415" stroke="#241708" stroke-width="1"/>
+  <path d="M30 60 Q34 66 30 72" stroke="#241708" stroke-width="1.2" fill="none" opacity="0.5"/>
+  <path d="M58 60 Q54 66 58 72" stroke="#241708" stroke-width="1.2" fill="none" opacity="0.5"/>
+  <path d="M30 34 Q35 30 40 33" stroke="#241708" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M48 33 Q53 30 58 34" stroke="#241708" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <circle cx="35" cy="39" r="2.6" fill="#1a1108"/>
+  <circle cx="53" cy="39" r="2.6" fill="#1a1108"/>
+  <ellipse cx="26" cy="46" rx="5" ry="3.4" fill="#e8836a" opacity="0.35"/>
+  <ellipse cx="62" cy="46" rx="5" ry="3.4" fill="#e8836a" opacity="0.35"/>
+  <path d="M44 38 Q42 45 44 48 Q46 46 45 44" stroke="#b87a4f" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+</svg>`;
+
 // ─── CHARACTERS ──────────────────────────────────────────────────────────────
 export const CHARACTERS = {
   mcgonagall: { name: 'Professor McGonagall', emoji: '🎩', color: '#d3a625' },
   snape:      { name: 'Professor Snape',      emoji: '🧪', color: '#2ea86e' },
-  hagrid:     { name: 'Hagrid',                emoji: '🗝️', color: '#c98a4b' },
+  hagrid:     { name: 'Hagrid',                emoji: '🗝️', svg: HAGRID_SVG, color: '#c98a4b' },
   dumbledore: { name: 'Albus Dumbledore',      emoji: '🧙‍♂️', color: '#9b7fd4' },
   nick:       { name: 'Nearly Headless Nick',  emoji: '👻', color: '#9ec3f0' },
   friar:      { name: 'The Fat Friar',         emoji: '🍩', color: '#e3b53d' },
@@ -134,7 +155,8 @@ function showCard(line) {
   const el = ensureCard();
   const char = CHARACTERS[line.char] || CHARACTERS.hat;
   el.style.setProperty('--char-color', char.color);
-  el.querySelector('.speech-avatar').textContent = char.emoji;
+  const avatar = el.querySelector('.speech-avatar');
+  if (char.svg) avatar.innerHTML = char.svg; else avatar.textContent = char.emoji;
   el.querySelector('.speech-name').textContent = char.name;
   el.querySelector('.speech-text').textContent = line.text;
   el.classList.add('speech-show');
@@ -268,10 +290,13 @@ function pickVoice(profile) {
   return pool[0];
 }
 
-export function speak(text, characterKey = 'default') {
-  if (!('speechSynthesis' in window)) return;
-  if (!isVoiceOn()) return;
-  if (!AudioEngine.enabled) return; // "only fires when sound is enabled"
+// `onDone` (optional) fires once speech ends/errors/is unsupported — speakLine()
+// uses it to restore ducked music exactly once regardless of which path speaks.
+export function speak(text, characterKey = 'default', onDone) {
+  const done = () => { if (onDone) onDone(); };
+  if (!('speechSynthesis' in window)) { done(); return; }
+  if (!isVoiceOn()) { done(); return; }
+  if (!AudioEngine.enabled) { done(); return; } // "only fires when sound is enabled"
   try {
     window.speechSynthesis.cancel();
     const profile = VOICE_PROFILES[characterKey] || VOICE_PROFILES.default;
@@ -281,8 +306,10 @@ export function speak(text, characterKey = 'default') {
     utt.pitch = profile.pitch;
     utt.rate = profile.rate;
     utt.volume = AudioEngine.getVolume ? AudioEngine.getVolume() : 1;
+    utt.onend = done;
+    utt.onerror = done;
     window.speechSynthesis.speak(utt);
-  } catch (e) { /* unsupported or blocked — no-op */ }
+  } catch (e) { done(); /* unsupported or blocked */ }
 }
 
 // ─── pre-recorded voice clips (audio/voices/<id>.m4a) ───────────────────────
@@ -293,11 +320,19 @@ export function speak(text, characterKey = 'default') {
 // generating, or fails to load — so every line stays sayable even before its
 // clip exists.
 let currentVoiceAudio = null;
+// Fires (once) whenever the in-flight line's speech ends, errors, or gets cut
+// off by an interruption — guarantees ducked music is never left stuck low.
+let currentVoiceRestore = null;
 
 function stopVoiceAudio() {
   if (currentVoiceAudio) {
     try { currentVoiceAudio.pause(); } catch (e) { /* ignore */ }
     currentVoiceAudio = null;
+  }
+  if (currentVoiceRestore) {
+    const restore = currentVoiceRestore;
+    currentVoiceRestore = null;
+    restore();
   }
 }
 
@@ -306,7 +341,16 @@ export function speakLine(line) {
   if (!isVoiceOn()) return;
   if (!AudioEngine.enabled) return;
   stopVoiceAudio();
-  if (!line.id) { speak(line.text, line.char); return; }
+  AudioEngine.duckMusic();
+  let restored = false;
+  const restoreOnce = () => {
+    if (restored) return;
+    restored = true;
+    if (currentVoiceRestore === restoreOnce) currentVoiceRestore = null;
+    AudioEngine.restoreMusic();
+  };
+  currentVoiceRestore = restoreOnce;
+  if (!line.id) { speak(line.text, line.char, restoreOnce); return; }
   try {
     const audio = new Audio(`audio/voices/${line.id}.m4a`);
     audio.volume = AudioEngine.getVolume ? AudioEngine.getVolume() : 1;
@@ -315,12 +359,13 @@ export function speakLine(line) {
       if (fellBack) return;
       fellBack = true;
       if (currentVoiceAudio === audio) currentVoiceAudio = null;
-      speak(line.text, line.char);
+      speak(line.text, line.char, restoreOnce);
     };
+    audio.addEventListener('ended', restoreOnce);
     audio.addEventListener('error', fallback);
     currentVoiceAudio = audio;
     audio.play().catch(fallback);
-  } catch (e) { speak(line.text, line.char); }
+  } catch (e) { speak(line.text, line.char, restoreOnce); }
 }
 
 export function cancelSpeech() {

@@ -7,10 +7,19 @@
     --accent-light: var(--gold-light);
     --accent-glow: rgba(201,168,76,0.5);
   }
-  body[data-house="gryffindor"] { --accent:#d3a625; --accent-light:#f0c75e; --accent-glow:rgba(174,0,1,0.45); }
+  body[data-house="gryffindor"] { --accent:#c23b3b; --accent-light:#f0c75e; --accent-glow:rgba(174,0,1,0.45); }
   body[data-house="slytherin"]  { --accent:#2ea86e; --accent-light:#7ee8a8; --accent-glow:rgba(42,98,61,0.5); }
   body[data-house="ravenclaw"]  { --accent:#6c9fd8; --accent-light:#9ec3f0; --accent-glow:rgba(34,71,119,0.5); }
   body[data-house="hufflepuff"] { --accent:#e3b53d; --accent-light:#f5d576; --accent-glow:rgba(96,86,15,0.5); }
+
+  /* Declaring a house should crossfade the whole UI, not snap. Low-specificity
+     default so any element's own transition (e.g. button hovers) still wins. */
+  body, body * {
+    transition: background-color 0.6s ease, border-color 0.6s ease, box-shadow 0.6s ease, color 0.6s ease;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    body, body * { transition-duration: 0.05s !important; }
+  }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 

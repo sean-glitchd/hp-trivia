@@ -12,8 +12,9 @@ const nebula = {
   ctx: null,
   w: 0, h: 0,
 
-  render(w, h, dpr) {
+  render(w, h, dpr, tint) {
     this.w = w; this.h = h;
+    this.dpr = dpr;
     this.canvas.width = Math.floor(w * dpr);
     this.canvas.height = Math.floor(h * dpr);
     if (!this.ctx) this.ctx = this.canvas.getContext('2d');
@@ -37,6 +38,16 @@ const nebula = {
       ctx.fillRect(0, 0, w, h);
     }
 
+    // house-tint wash — blends the whole sky toward the selected house color
+    if (tint) {
+      const { r, g, b } = tint;
+      const grad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, Math.max(w, h) * 0.8);
+      grad.addColorStop(0, `rgba(${r},${g},${b},0.22)`);
+      grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+    }
+
     // vignette
     const vg = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.3, w / 2, h / 2, Math.max(w, h) * 0.75);
     vg.addColorStop(0, 'rgba(0,0,0,0)');
@@ -53,8 +64,44 @@ export function setBrightness(mult) {
   brightness = mult;
 }
 
+// ── House tint: nebula blends toward the selected house's accent color ──────
+// (lumos/brightness template above, but a lerped RGB target instead of a
+// scalar) so declaring a house crossfades the whole sky, not just the UI chrome.
+const TINT_DURATION = 0.6; // seconds, matches the CSS crossfade below
+let currentTint = null;
+let tintFrom = null, tintTo = null, tintT = 1; // tintT===1 means settled, no active lerp
+
+function hexToRgb(hex) {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return m ? { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) } : null;
+}
+
+export function setHouseTint(hex) {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return;
+  if (FX.reduced) {
+    currentTint = tintFrom = tintTo = rgb;
+    tintT = 1;
+    if (nebula.w) nebula.render(nebula.w, nebula.h, nebula.dpr || 1, currentTint);
+    return;
+  }
+  tintFrom = currentTint || rgb;
+  tintTo = rgb;
+  tintT = 0;
+}
+
 const nebulaLayer = {
-  resize(w, h, dpr) { nebula.render(w, h, dpr); },
+  resize(w, h, dpr) { nebula.render(w, h, dpr, currentTint); },
+  update(dt) {
+    if (tintT >= 1) return;
+    tintT = Math.min(1, tintT + dt / TINT_DURATION);
+    currentTint = {
+      r: tintFrom.r + (tintTo.r - tintFrom.r) * tintT,
+      g: tintFrom.g + (tintTo.g - tintFrom.g) * tintT,
+      b: tintFrom.b + (tintTo.b - tintFrom.b) * tintT,
+    };
+    if (nebula.w) nebula.render(nebula.w, nebula.h, nebula.dpr || 1, currentTint);
+  },
   draw(ctx) {
     if (nebula.w && nebula.h) {
       ctx.drawImage(nebula.canvas, 0, 0, nebula.canvas.width, nebula.canvas.height, 0, 0, nebula.w, nebula.h);

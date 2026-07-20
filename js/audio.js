@@ -40,6 +40,56 @@ export const AudioEngine = {
     if (this.ctx.state === 'suspended') this.ctx.resume();
   },
 
+  // ─── ducking: dialogue.js quiets the music while a voice line speaks ──────
+  // Depth-counted so overlapping duck/restore calls (e.g. a clip erroring and
+  // immediately falling back to Web Speech) never leave music stuck low —
+  // only the outermost duck/restore pair actually changes the volume.
+  _duckDepth: 0,
+  _duckSavedMusicGain: null,
+  _duckSavedThemeVol: null,
+  _themeTweenId: null,
+
+  _tweenThemeVolume(target, ms) {
+    if (this._themeTweenId) { clearInterval(this._themeTweenId); this._themeTweenId = null; }
+    const audio = this.themeAudio;
+    if (!audio) return;
+    const start = audio.volume;
+    const startTime = performance.now();
+    this._themeTweenId = setInterval(() => {
+      const t = Math.min(1, (performance.now() - startTime) / ms);
+      audio.volume = start + (target - start) * t;
+      if (t >= 1) { clearInterval(this._themeTweenId); this._themeTweenId = null; }
+    }, 40);
+  },
+
+  duckMusic() {
+    this._duckDepth++;
+    if (this._duckDepth > 1) return; // already ducked — don't restack
+    const factor = 0.28;
+    if (this.musicGain && this.ctx) {
+      this._duckSavedMusicGain = this.musicGain.gain.value;
+      this.musicGain.gain.setTargetAtTime(this._duckSavedMusicGain * factor, this.ctx.currentTime, 0.15);
+    }
+    if (this.themeAudio) {
+      this._duckSavedThemeVol = this.themeAudio.volume;
+      this._tweenThemeVolume(this._duckSavedThemeVol * factor, 250);
+    }
+  },
+
+  restoreMusic() {
+    if (this._duckDepth === 0) return;
+    this._duckDepth--;
+    if (this._duckDepth > 0) return; // still ducked by an overlapping call
+    if (this.musicGain && this.ctx && this._duckSavedMusicGain != null) {
+      this.musicGain.gain.setTargetAtTime(this._duckSavedMusicGain, this.ctx.currentTime, 0.3);
+    }
+    if (this.themeAudio && this._duckSavedThemeVol != null) {
+      this._tweenThemeVolume(this._duckSavedThemeVol, 400);
+    }
+    this._duckSavedMusicGain = null;
+    this._duckSavedThemeVol = null;
+  },
+
   toggle() {
     this.enabled = !this.enabled;
     localStorage.setItem('hp_sound', this.enabled ? 'on' : 'off');

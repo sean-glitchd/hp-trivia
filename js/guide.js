@@ -24,7 +24,7 @@ function markSeen(beatId) {
 }
 
 // ─── speakers ────────────────────────────────────────────────────────────────
-const HAGRID = { key: 'hagrid', name: 'Hagrid', emoji: '🧑‍🌾', color: '#c98a4c' };
+const HAGRID = { key: 'hagrid', name: 'Hagrid', emoji: '🧑‍🌾', svg: Dialogue.HAGRID_SVG, color: '#c98a4c' };
 const MCG = { key: 'mcgonagall', name: 'Professor McGonagall', emoji: '🎩', color: '#9db4d0' };
 const DUMBLEDORE = { key: 'dumbledore', name: 'Professor Dumbledore', emoji: '🧙‍♂️', color: '#c9a84c' };
 
@@ -104,7 +104,7 @@ function typeLine(line) {
   const advanceEl = document.getElementById('guide-advance');
   nameEl.textContent = line.name;
   nameEl.style.color = line.color || '#c9a84c';
-  portraitEl.textContent = line.emoji;
+  if (line.svg) portraitEl.innerHTML = line.svg; else portraitEl.textContent = line.emoji;
   portraitEl.style.borderColor = line.color || '#c9a84c';
   fullText = interp(line.text);
   advanceEl.classList.add('hidden');

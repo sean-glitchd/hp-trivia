@@ -3,7 +3,7 @@ import { AudioEngine } from './audio.js';
 import { FX } from './fx.js';
 import { Snitch } from './snitch.js';
 import { Hedwig } from './hedwig.js';
-import { spawnOwlFlyby } from './sky.js';
+import { spawnOwlFlyby, setHouseTint } from './sky.js';
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
 let currentQuestions = [];
@@ -97,6 +97,8 @@ export function applyHouse() {
     b.classList.toggle('selected', (b.dataset.house || null) === (house || null));
   });
   FX.refreshAccent();
+  const accent = getComputedStyle(document.body).getPropertyValue('--accent').trim();
+  if (accent) setHouseTint(accent);
 }
 
 // ─── SCREEN TRANSITIONS ──────────────────────────────────────────────────────

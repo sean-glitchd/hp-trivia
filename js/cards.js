@@ -37,7 +37,7 @@ export const CARDS = [
   { id: 'ginny',         name: 'Ginny Weasley',       emoji: '🔥', rarity: 'common', flavor: 'A formidable Chaser and duellist, never one to be underestimated by her enemies.' },
   { id: 'weasley-twins', name: 'Fred & George Weasley', emoji: '🎆', rarity: 'common', flavor: "Founders of Weasleys' Wizard Wheezes, and Hogwarts' most inventive troublemakers." },
   { id: 'draco',         name: 'Draco Malfoy',        emoji: '🐍', rarity: 'common', flavor: 'A Slytherin prefect raised on old prejudice, who ultimately chose not to finish what he started.' },
-  { id: 'hagrid',        name: 'Rubeus Hagrid',       emoji: '🗝️', rarity: 'common', flavor: 'Keeper of Keys and Grounds at Hogwarts, with a fondness for creatures most wizards fear.' },
+  { id: 'hagrid',        name: 'Rubeus Hagrid',       emoji: '🗝️', portrait: Dialogue.HAGRID_SVG, rarity: 'common', flavor: 'Keeper of Keys and Grounds at Hogwarts, with a fondness for creatures most wizards fear.' },
   { id: 'crookshanks',   name: 'Crookshanks',         emoji: '🐈', rarity: 'common', flavor: 'A half-Kneazle cat with an uncanny nose for finding out who — or what — cannot be trusted.' },
   { id: 'scabbers',      name: 'Scabbers',            emoji: '🐀', rarity: 'common', flavor: 'A rat that lived twelve suspiciously long years in the Weasley family — with good reason.' },
   { id: 'trevor',        name: 'Trevor',              emoji: '🐸', rarity: 'common', flavor: "Neville Longbottom's toad, forever escaping — and forever found again." },
@@ -133,7 +133,7 @@ function frogCardHTML(card, cardCount) {
     <div class="frog-card frog-card-${card.rarity}">
       <span class="frog-card-ribbon">${card.rarity}</span>
       ${cardCount > 1 ? `<span class="frog-card-dupe">×${cardCount}</span>` : ''}
-      <div class="frog-card-portrait"><span class="frog-card-emoji">${card.emoji}</span></div>
+      <div class="frog-card-portrait">${card.portrait ? `<span class="frog-card-emoji frog-card-svg">${card.portrait}</span>` : `<span class="frog-card-emoji">${card.emoji}</span>`}</div>
       <div class="frog-card-name">${card.name}</div>
       <div class="frog-card-flavor">${card.flavor}</div>
     </div>`;
@@ -224,15 +224,21 @@ function renderGallery() {
     const tile = document.createElement('button');
     tile.type = 'button';
     tile.className = `gallery-tile gallery-tile-${c > 0 ? card.rarity : 'unowned'}`;
+    const emojiHTML = card.portrait
+      ? `<span class="gallery-tile-emoji gallery-tile-svg">${card.portrait}</span>`
+      : `<span class="gallery-tile-emoji">${card.emoji}</span>`;
     if (c > 0) {
       tile.innerHTML = `
-        <span class="gallery-tile-emoji">${card.emoji}</span>
+        ${emojiHTML}
         <span class="gallery-tile-name">${card.name}</span>
         ${c > 1 ? `<span class="gallery-tile-dupe">×${c}</span>` : ''}`;
       tile.addEventListener('click', () => openLightbox(card, c));
     } else {
+      const silhouetteHTML = card.portrait
+        ? `<span class="gallery-tile-emoji gallery-tile-svg gallery-tile-silhouette">${card.portrait}</span>`
+        : `<span class="gallery-tile-emoji gallery-tile-silhouette">${card.emoji}</span>`;
       tile.innerHTML = `
-        <span class="gallery-tile-emoji gallery-tile-silhouette">${card.emoji}</span>
+        ${silhouetteHTML}
         <span class="gallery-tile-q">?</span>`;
       tile.disabled = true;
     }
