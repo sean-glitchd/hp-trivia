@@ -1,8 +1,9 @@
 // ─── daily.js: date-seeded Daily Prophet round, hp_daily, streak calendar ──
 // Imports quiz.js primitives + questions/arsenal/cards/journey/audio/abilities.
 // The round runs through composeRoundHooks (persistent inventory only, no free
-// Obliviate) so the Daily Prophet draws on the same spell bar + house passive
-// as a journey lesson — and, importantly, resets the arsenal's per-round state.
+// Obliviate, house: null) so the Daily Prophet draws on the same spell bar as a
+// journey lesson but grants no house passive — and, importantly, resets the
+// arsenal's per-round state.
 
 import {
   startRound, switchScreen, renderResultShell, updateWelcomeScreen, getPoints,
@@ -186,12 +187,12 @@ function startDailyRound(ev) {
       AudioEngine.playClick();
       switchScreen('screen-result', 'screen-welcome', updateWelcomeScreen);
     },
-  }, { freeObliviate: false });
+  }, { freeObliviate: false, house: null });
   startRound(cfg, ev);
 }
 
 function dailyRoundEnd(score, total) {
-  renderResultShell(score, total);
+  renderResultShell(score, total, null);
   document.getElementById('expert-unlocked-banner')?.classList.add('hidden');
 
   const today = dateKey();

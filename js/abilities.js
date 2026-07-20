@@ -4,7 +4,7 @@
 // composed into round configs by main.js/journey.js/duel.js — the same
 // composition sites that layer in arsenal.js.
 
-import { showToast, addPoints, getHouse } from './quiz.js';
+import { showToast, addPoints } from './quiz.js';
 import { HOUSES } from './questions.js';
 import { Arsenal, ArsenalDuel } from './arsenal.js';
 import { FX } from './fx.js';
@@ -68,9 +68,12 @@ function onAnswer(isCorrect, ctx) {
 }
 
 function hooks(house) {
-  if (!house || !HOUSES[house]) return {};
+  // Always reset round state (and re-render the chip) even for a null/unknown
+  // house, so it hides itself instead of showing a stale house from a
+  // previous round — adjudicate/onAnswer are already no-ops without a house.
+  const resolved = house && HOUSES[house] ? house : null;
   return {
-    onRoundStart: () => resetRoundState(house),
+    onRoundStart: () => resetRoundState(resolved),
     adjudicate,
     onAnswer,
   };
@@ -106,10 +109,12 @@ function renderChip() {
 //   • composes the adjudicate chain: house verdict (Gryffindor retry /
 //     Hufflepuff forgiven) first, then in the duel a Patronus shield on a wrong
 //     answer ('shielded'), then any base adjudicate — first truthy wins.
-// The house is read fresh at round start so changing houses between rounds
-// takes effect immediately. base's other fields (questions, onRoundEnd,
-// buttons, getInterstitial, …) pass straight through.
-export function composeRoundHooks(base, { freeObliviate = false, duel = false } = {}) {
+// The house is supplied by the caller via the `house` option — each mode
+// resolves its own identity (Quick Quiz's declared house, Journey/Duel's
+// sorted house, or null for modes with no house passive) and passes it in.
+// base's other fields (questions, onRoundEnd, buttons, getInterstitial, …)
+// pass straight through.
+export function composeRoundHooks(base, { freeObliviate = false, duel = false, house = null } = {}) {
   const baseStart = base.onRoundStart;
   const baseShown = base.onQuestionShown;
   const baseAnswer = base.onAnswer;
@@ -118,7 +123,7 @@ export function composeRoundHooks(base, { freeObliviate = false, duel = false } 
   return {
     ...base,
     onRoundStart: () => {
-      hh = hooks(getHouse());
+      hh = hooks(house);
       Arsenal.beginRound({ freeObliviate, persistentAllowed: true, duel });
       hh.onRoundStart?.();
       baseStart?.();

@@ -3,7 +3,8 @@
 // this module — journey rounds run through startRound(config) hooks only.
 
 import {
-  startRound, renderResultShell, switchScreen, getPoints, updateWelcomeScreen, setHouse, applyHouse, showToast,
+  startRound, renderResultShell, switchScreen, getPoints, updateWelcomeScreen,
+  setJourneyHouse, applyJourneyHouse, getJourneyHouse, showToast,
 } from './quiz.js';
 import { allQuestions, HOUSES } from './questions.js';
 import * as Dialogue from './dialogue.js';
@@ -156,11 +157,6 @@ function hasSavedJourney() {
   return !!localStorage.getItem('hp_journey');
 }
 
-function getPlayerHouse() {
-  const h = localStorage.getItem('hp_house');
-  return HOUSES[h] ? h : null;
-}
-
 // ─── QUESTION SELECTION (per-year used-set) ──────────────────────────────────
 let usedYear = 0;
 const usedSet = new Set();
@@ -215,7 +211,7 @@ function drawReserve(blend, count = 3) {
 
 // ─── HOUSE CUP ───────────────────────────────────────────────────────────────
 function bankCup(pts) {
-  const player = getPlayerHouse();
+  const player = getJourneyHouse();
   state.cup.player += pts;
   const arch = player === 'slytherin' ? 'gryffindor' : 'slytherin';
   for (const h of Object.keys(HOUSES)) {
@@ -232,7 +228,7 @@ function bankCup(pts) {
 }
 
 function cupStandings() {
-  const player = getPlayerHouse();
+  const player = getJourneyHouse();
   const rows = [];
   if (player) {
     rows.push({ id: player, label: `${HOUSE_EMOJI[player]} ${HOUSES[player].name}`, pts: state.cup.player, color: HOUSE_COLOR[player], isPlayer: true });
@@ -375,7 +371,7 @@ function resetClick() {
   ['hp_journey', 'hp_name', 'hp_house', 'hp_seen', 'hp_arsenal'].forEach(k => localStorage.removeItem(k));
   state = freshState();
   usedSet.clear(); usedYear = 0;
-  setHouse(null);       // clears data-house + accent (via applyHouse)
+  setJourneyHouse(null); // clears data-house + accent (via applyJourneyHouse)
   Guide.resetSeen();    // Hagrid's walkthrough replays this session
   Arsenal.reset();      // starter kit re-grants on the next journey entry
   refreshCTA();
@@ -620,7 +616,7 @@ function beginPending(ev) {
     // labels/actions are finalized in journeyRoundEnd once pass/fail is known
     primaryLabel: 'Continue',
     secondaryLabel: 'Back to the Year',
-  }, { freeObliviate: false });
+  }, { freeObliviate: false, house: getJourneyHouse() });
   startRound(activeConfig, ev);
 }
 
@@ -698,11 +694,11 @@ function journeyRoundEnd(kind, year, lesson, score, total) {
   save();
 
   // result presentation: shared shell, then journey-specific grade seal + banner
-  renderResultShell(score, total);
+  const player = getJourneyHouse();
+  renderResultShell(score, total, player);
   Dialogue.renderGradeSeal(score, total);
   document.getElementById('expert-unlocked-banner').classList.add('hidden');
 
-  const player = getPlayerHouse();
   const houseName = player ? HOUSES[player].name : 'your tally';
   const banner = document.getElementById('journey-result-banner');
   const headline = pass
@@ -805,7 +801,7 @@ function startChallenge(ev) {
 }
 
 function challengeRoundEnd(score) {
-  renderResultShell(score, 15);
+  renderResultShell(score, 15, getJourneyHouse());
   document.getElementById('journey-result-banner')?.classList.add('hidden');
   document.getElementById('expert-unlocked-banner')?.classList.add('hidden');
   if (score >= 13 && !state.challenge) {
@@ -996,7 +992,7 @@ function deliberate() {
 }
 
 function revealHouse(house) {
-  setHouse(house); // applies accent theming live (also plays click)
+  setJourneyHouse(house); // applies accent theming live (also plays click)
   const overlay = document.getElementById('house-reveal');
   overlay.style.setProperty('--reveal-color', HOUSE_COLOR[house]);
   overlay.innerHTML = `
@@ -1098,7 +1094,7 @@ export const Journey = {
       switchScreen('screen-welcome', 'screen-sorting', startSorting);
     } else {
       renderMap();
-      applyHouse(); // returning already-sorted player — splash was neutral, repaint their house now
+      applyJourneyHouse(); // returning already-sorted player — splash was neutral, repaint their house now
       switchScreen('screen-welcome', 'screen-journey');
     }
   },

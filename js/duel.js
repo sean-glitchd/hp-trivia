@@ -6,7 +6,7 @@
 // journey owns navigation/flow and duel.start() hands control back to it via
 // a callback once the fight is over).
 
-import { startRound, renderResultShell, getPoints, getHouse, showToast } from './quiz.js';
+import { startRound, renderResultShell, getPoints, getJourneyHouse, showToast } from './quiz.js';
 import { allQuestions } from './questions.js';
 import * as Dialogue from './dialogue.js';
 import { AudioEngine } from './audio.js';
@@ -499,7 +499,7 @@ function duelRoundEnd(finalScore, total) {
   document.getElementById('journey-result-banner')?.classList.add('hidden');
   document.getElementById('expert-unlocked-banner')?.classList.add('hidden');
 
-  renderResultShell(finalScore, total);
+  renderResultShell(finalScore, total, getJourneyHouse());
   // renderResultShell's house pity/praise line is keyed off raw quiz score,
   // not the HP-based duel outcome — "Courage isn't knowing everything" under
   // "THE DARK LORD FALLS" reads as a mismatch, so the duel supplies its own
@@ -570,7 +570,7 @@ function beginDuel(ev) {
     onAbandon: duelAbandon,
     primaryLabel: '', primaryAction: null,
     secondaryLabel: '', secondaryAction: null,
-  }, { duel: true });
+  }, { duel: true, house: getJourneyHouse() });
   AudioEngine.playCast();
   startRound(activeConfig, ev);
 }

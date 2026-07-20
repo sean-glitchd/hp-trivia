@@ -77,25 +77,40 @@ export function updateWelcomeScreen() {
 }
 
 // ─── HOUSES ──────────────────────────────────────────────────────────────────
-// Exported read-only: abilities.js/main.js need the current house to compose
-// house-ability hooks into a round config without duplicating this lookup.
-export function getHouse() {
+// Two independent identities, each with its own storage key: Quick Quiz's ad
+// hoc "Declare your allegiance" pick (hp_quick_house) and Journey's canonical
+// Sorting Hat result (hp_house, unchanged name for save-compat). They drive
+// separate house-passive bonuses (abilities.js) and never overwrite each other.
+export function getQuickHouse() {
+  const h = localStorage.getItem('hp_quick_house');
+  return HOUSES[h] ? h : null;
+}
+
+export function setQuickHouse(house) {
+  AudioEngine.playClick();
+  if (house) localStorage.setItem('hp_quick_house', house);
+  else localStorage.removeItem('hp_quick_house');
+  applyQuickHouse();
+}
+
+export function getJourneyHouse() {
   const h = localStorage.getItem('hp_house');
   return HOUSES[h] ? h : null;
 }
 
-export function setHouse(house) {
+export function setJourneyHouse(house) {
   AudioEngine.playClick();
   if (house) localStorage.setItem('hp_house', house);
   else localStorage.removeItem('hp_house');
-  applyHouse();
+  applyJourneyHouse();
 }
 
-// Keeps the Quick Quiz house-picker buttons in sync with the stored house —
+// Keeps the Quick Quiz house-picker buttons in sync with the declared house —
 // harmless to call even while that screen isn't visible (e.g. from the splash
 // screen's neutral reset), so the buttons are already correct whenever it is.
+// (.house-btn elements only exist on screen-quick, so this always reads Quick's key.)
 function syncHouseButtons() {
-  const house = getHouse();
+  const house = getQuickHouse();
   document.querySelectorAll('.house-btn').forEach(b => {
     b.classList.toggle('selected', (b.dataset.house || null) === (house || null));
   });
@@ -117,16 +132,21 @@ function paintHouseTheme(house) {
   }
 }
 
-// Full paint: syncs the picker buttons and themes the app from the stored
-// house. Used where the declared/sorted house should visibly apply right now
-// (the house picker itself, and the Sorting Hat's reveal).
-export function applyHouse() {
-  const house = getHouse();
+// Full paint: syncs the picker buttons and themes the app from Quick Quiz's
+// declared house. Used where that choice should visibly apply right now (the
+// house picker itself, and re-entering the Quick Quiz screen).
+export function applyQuickHouse() {
   syncHouseButtons();
-  paintHouseTheme(house);
+  paintHouseTheme(getQuickHouse());
 }
 
-// Resets the app to its neutral default look without touching the stored
+// Full paint: themes the app from Journey's sorted house. No syncHouseButtons()
+// — Journey has no house-picker UI, sorting only happens once via the Hat.
+export function applyJourneyHouse() {
+  paintHouseTheme(getJourneyHouse());
+}
+
+// Resets the app to its neutral default look without touching either stored
 // house — called whenever the splash screen is (re)shown, since house theming
 // should never bleed onto it.
 export function clearHouseTheme() {
@@ -234,7 +254,7 @@ export function startQuiz(difficulty, ev) {
   AudioEngine.playCast();
   currentDifficulty = difficulty;
 
-  startRound(buildQuickConfig(difficulty, 'screen-welcome'), ev);
+  startRound(buildQuickConfig(difficulty, 'screen-quick'), ev);
 }
 
 function showQuestion() {
@@ -534,7 +554,7 @@ function renderStars(finalScore) {
 // Extracted shell: Snitch.onQuizEnd + count-up + stars + rating/comment +
 // house line. Everything EXCEPT expert-unlock, confetti, and button labels —
 // those stay mode-specific (quick mode's tail is quickRoundEnd() below).
-export function renderResultShell(finalScore, total) {
+export function renderResultShell(finalScore, total, house) {
   Snitch.onQuizEnd();
   Hedwig.onQuizEnd();
   animateScoreCountUp(finalScore, total);
@@ -553,7 +573,6 @@ export function renderResultShell(finalScore, total) {
   document.getElementById('result-rating').textContent = r.rating;
   document.getElementById('result-comment').textContent = r.comment;
 
-  const house = getHouse();
   const houseLineEl = document.getElementById('result-house-line');
   if (house) {
     const h = HOUSES[house];
@@ -567,7 +586,7 @@ export function renderResultShell(finalScore, total) {
 // Quick mode's onRoundEnd: the current showResult tail (expert-unlock +
 // confetti thresholds), on top of the shared shell.
 function quickRoundEnd(finalScore, total) {
-  renderResultShell(finalScore, total);
+  renderResultShell(finalScore, total, getQuickHouse());
 
   // Journey mode may have left its banner on the shared result screen —
   // quick mode always clears it (no import needed, just the element).

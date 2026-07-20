@@ -6,8 +6,9 @@ import { Snitch } from './snitch.js';
 import {
   updateWelcomeScreen,
   updateQuickScreen,
-  applyHouse,
-  setHouse,
+  applyQuickHouse,
+  setQuickHouse,
+  getQuickHouse,
   startQuiz,
   nextQuestion,
   resultPrimary,
@@ -40,7 +41,7 @@ Guide.init();
 // ─── House picker ────────────────────────────────────────────────────────────
 document.querySelectorAll('.house-btn').forEach(btn => {
   const house = btn.dataset.house || null;
-  btn.addEventListener('click', () => setHouse(house));
+  btn.addEventListener('click', () => setQuickHouse(house));
 });
 
 // ─── Splash portals ──────────────────────────────────────────────────────────
@@ -48,8 +49,9 @@ document.getElementById('journey-btn').addEventListener('click', (e) => Journey.
 document.getElementById('quick-btn').addEventListener('click', () => {
   AudioEngine.playClick();
   updateQuickScreen();
-  applyHouse(); // repaints any previously-declared house — splash itself stays neutral
+  applyQuickHouse(); // repaints any previously-declared house — splash itself stays neutral
   switchScreen('screen-welcome', 'screen-quick');
+  Guide.playBeatOnce('quick-intro');
 });
 document.getElementById('quick-back').addEventListener('click', () => {
   AudioEngine.playClick();
@@ -71,7 +73,7 @@ document.getElementById('next-btn').addEventListener('click', () => nextQuestion
 // any persistent charges and the chosen house's passive. The snitch's reward
 // now flows through the arsenal (round-scoped Obliviate top-up, cap 2 — same as
 // the old 50/50 restore).
-setQuickConfigDecorator((base) => composeRoundHooks(base, { freeObliviate: true }));
+setQuickConfigDecorator((base) => composeRoundHooks(base, { freeObliviate: true, house: getQuickHouse() }));
 Snitch.setRewardCallback(() => Arsenal.onSnitchCaught());
 
 // Hedwig's letter: 70% a random spell charge, 30% a Chocolate Frog card.

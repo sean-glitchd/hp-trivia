@@ -39,6 +39,11 @@ const BEATS = {
     { ...HAGRID, id: 'journey-intro-5', text: "Every answer earns House Points fer the House Cup. An' keep yer eyes peeled — the Golden Snitch an' Hedwig turn up now an' then. Catch 'em fer a reward!" },
     { ...HAGRID, id: 'journey-intro-6', text: "Right then, {name}. Off yeh go. Make us proud." },
   ],
+  'quick-intro': () => [
+    { ...HAGRID, id: 'quick-intro-1', text: "Oh, just after a quick round, are yeh? Ten questions, pick yer difficulty, an' off yeh go." },
+    { ...HAGRID, id: 'quick-intro-2', text: "Keep an eye out fer the Golden Snitch an' Hedwig — catch 'em fer a bonus spell charge or two." },
+    { ...HAGRID, id: 'quick-intro-3', text: "An' if yeh declare a House up top, yeh'll get their special perk fer this round. Go on then — good luck!" },
+  ],
   'first-exam': () => [
     { ...MCG, id: 'first-exam-1', text: "This is your Final Exam, {name} — twenty questions, and fourteen correct to pass. Do concentrate." },
   ],
