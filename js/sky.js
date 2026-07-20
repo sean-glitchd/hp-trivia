@@ -39,10 +39,10 @@ const nebula = {
     }
 
     // house-tint wash — blends the whole sky toward the selected house color
-    if (tint) {
-      const { r, g, b } = tint;
+    if (tint && tint.a > 0.002) {
+      const { r, g, b, a } = tint;
       const grad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, Math.max(w, h) * 0.8);
-      grad.addColorStop(0, `rgba(${r},${g},${b},0.22)`);
+      grad.addColorStop(0, `rgba(${r},${g},${b},${a})`);
       grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, w, h);
@@ -65,11 +65,16 @@ export function setBrightness(mult) {
 }
 
 // ── House tint: nebula blends toward the selected house's accent color ──────
-// (lumos/brightness template above, but a lerped RGB target instead of a
-// scalar) so declaring a house crossfades the whole sky, not just the UI chrome.
+// (lumos/brightness template above, but a lerped RGB+alpha target instead of
+// a scalar) so declaring a house crossfades the whole sky, not just the UI
+// chrome — and clearHouseTint() fades the same wash back out to nothing when
+// the player returns to a neutral screen (splash, pre-reveal sorting, etc.).
 const TINT_DURATION = 0.6; // seconds, matches the CSS crossfade below
-let currentTint = null;
-let tintFrom = null, tintTo = null, tintT = 1; // tintT===1 means settled, no active lerp
+const TINT_ALPHA = 0.22;
+let currentTint = null; // {r,g,b,a} — null once fully settled at neutral
+let tintFromColor = null, tintToColor = null;
+let tintFromAlpha = 0, tintToAlpha = 0;
+let tintT = 1; // tintT===1 means settled, no active lerp
 
 function hexToRgb(hex) {
   const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -80,13 +85,34 @@ export function setHouseTint(hex) {
   const rgb = hexToRgb(hex);
   if (!rgb) return;
   if (FX.reduced) {
-    currentTint = tintFrom = tintTo = rgb;
+    currentTint = { ...rgb, a: TINT_ALPHA };
+    tintFromColor = tintToColor = rgb;
+    tintFromAlpha = tintToAlpha = TINT_ALPHA;
     tintT = 1;
     if (nebula.w) nebula.render(nebula.w, nebula.h, nebula.dpr || 1, currentTint);
     return;
   }
-  tintFrom = currentTint || rgb;
-  tintTo = rgb;
+  tintFromColor = currentTint || rgb;
+  tintFromAlpha = currentTint ? currentTint.a : 0;
+  tintToColor = rgb;
+  tintToAlpha = TINT_ALPHA;
+  tintT = 0;
+}
+
+// Fades the wash back to nothing (keeps the last color, just ramps alpha to
+// 0) — used whenever the app returns to a screen that shouldn't read as any
+// particular house (splash, the sorting ceremony before the Hat decides).
+export function clearHouseTint() {
+  if (FX.reduced) {
+    currentTint = null;
+    tintT = 1;
+    if (nebula.w) nebula.render(nebula.w, nebula.h, nebula.dpr || 1, null);
+    return;
+  }
+  if (!currentTint) return; // already neutral
+  tintFromColor = tintToColor = currentTint;
+  tintFromAlpha = currentTint.a;
+  tintToAlpha = 0;
   tintT = 0;
 }
 
@@ -95,11 +121,11 @@ const nebulaLayer = {
   update(dt) {
     if (tintT >= 1) return;
     tintT = Math.min(1, tintT + dt / TINT_DURATION);
-    currentTint = {
-      r: tintFrom.r + (tintTo.r - tintFrom.r) * tintT,
-      g: tintFrom.g + (tintTo.g - tintFrom.g) * tintT,
-      b: tintFrom.b + (tintTo.b - tintFrom.b) * tintT,
-    };
+    const r = tintFromColor.r + (tintToColor.r - tintFromColor.r) * tintT;
+    const g = tintFromColor.g + (tintToColor.g - tintFromColor.g) * tintT;
+    const b = tintFromColor.b + (tintToColor.b - tintFromColor.b) * tintT;
+    const a = tintFromAlpha + (tintToAlpha - tintFromAlpha) * tintT;
+    currentTint = a > 0.002 ? { r, g, b, a } : null;
     if (nebula.w) nebula.render(nebula.w, nebula.h, nebula.dpr || 1, currentTint);
   },
   draw(ctx) {

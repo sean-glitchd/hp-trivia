@@ -3,7 +3,7 @@
 // this module — journey rounds run through startRound(config) hooks only.
 
 import {
-  startRound, renderResultShell, switchScreen, getPoints, updateWelcomeScreen, setHouse, showToast,
+  startRound, renderResultShell, switchScreen, getPoints, updateWelcomeScreen, setHouse, applyHouse, showToast,
 } from './quiz.js';
 import { allQuestions, HOUSES } from './questions.js';
 import * as Dialogue from './dialogue.js';
@@ -1098,6 +1098,7 @@ export const Journey = {
       switchScreen('screen-welcome', 'screen-sorting', startSorting);
     } else {
       renderMap();
+      applyHouse(); // returning already-sorted player — splash was neutral, repaint their house now
       switchScreen('screen-welcome', 'screen-journey');
     }
   },

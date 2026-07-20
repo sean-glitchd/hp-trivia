@@ -48,6 +48,7 @@ document.getElementById('journey-btn').addEventListener('click', (e) => Journey.
 document.getElementById('quick-btn').addEventListener('click', () => {
   AudioEngine.playClick();
   updateQuickScreen();
+  applyHouse(); // repaints any previously-declared house — splash itself stays neutral
   switchScreen('screen-welcome', 'screen-quick');
 });
 document.getElementById('quick-back').addEventListener('click', () => {
@@ -125,8 +126,7 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
-updateWelcomeScreen();
-applyHouse();
+updateWelcomeScreen(); // boots on the splash screen — stays neutral regardless of any stored house
 AudioEngine.updateButtons();
 Journey.init();
 Nav.init();

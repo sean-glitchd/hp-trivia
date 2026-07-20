@@ -3,7 +3,7 @@ import { AudioEngine } from './audio.js';
 import { FX } from './fx.js';
 import { Snitch } from './snitch.js';
 import { Hedwig } from './hedwig.js';
-import { spawnOwlFlyby, setHouseTint } from './sky.js';
+import { spawnOwlFlyby, setHouseTint, clearHouseTint } from './sky.js';
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
 let currentQuestions = [];
@@ -72,6 +72,8 @@ export function updateQuickScreen() {
 // home keeps the Quick screen current even though it's a sub-screen now.
 export function updateWelcomeScreen() {
   updateQuickScreen();
+  syncHouseButtons();
+  clearHouseTheme();
 }
 
 // ─── HOUSES ──────────────────────────────────────────────────────────────────
@@ -89,16 +91,46 @@ export function setHouse(house) {
   applyHouse();
 }
 
-export function applyHouse() {
+// Keeps the Quick Quiz house-picker buttons in sync with the stored house —
+// harmless to call even while that screen isn't visible (e.g. from the splash
+// screen's neutral reset), so the buttons are already correct whenever it is.
+function syncHouseButtons() {
   const house = getHouse();
-  if (house) document.body.dataset.house = house;
-  else delete document.body.dataset.house;
   document.querySelectorAll('.house-btn').forEach(b => {
     b.classList.toggle('selected', (b.dataset.house || null) === (house || null));
   });
+}
+
+// Paints (or clears) the whole-app accent theme. Deliberately screen-scoped —
+// callers decide *when* it's appropriate to show a house's colors (Quick Quiz
+// once declared, Journey once sorted) rather than it following storage
+// unconditionally, so the splash screen and a not-yet-sorted Journey stay neutral.
+function paintHouseTheme(house) {
+  if (house) document.body.dataset.house = house;
+  else delete document.body.dataset.house;
   FX.refreshAccent();
-  const accent = getComputedStyle(document.body).getPropertyValue('--accent').trim();
-  if (accent) setHouseTint(accent);
+  if (house) {
+    const accent = getComputedStyle(document.body).getPropertyValue('--accent').trim();
+    if (accent) setHouseTint(accent);
+  } else {
+    clearHouseTint();
+  }
+}
+
+// Full paint: syncs the picker buttons and themes the app from the stored
+// house. Used where the declared/sorted house should visibly apply right now
+// (the house picker itself, and the Sorting Hat's reveal).
+export function applyHouse() {
+  const house = getHouse();
+  syncHouseButtons();
+  paintHouseTheme(house);
+}
+
+// Resets the app to its neutral default look without touching the stored
+// house — called whenever the splash screen is (re)shown, since house theming
+// should never bleed onto it.
+export function clearHouseTheme() {
+  paintHouseTheme(null);
 }
 
 // ─── SCREEN TRANSITIONS ──────────────────────────────────────────────────────
