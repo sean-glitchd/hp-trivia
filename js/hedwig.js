@@ -65,7 +65,46 @@ function update(dt, t) {
   stepGlide(dt, t);
 }
 
-// ─── drawing: large white owl (sky.js's owl-flyby technique, ~1.8x, white) ──
+// ─── drawing: snowy owl ─────────────────────────────────────────────────────
+// Body in profile, head turned to face the viewer — the classic owl pose, and
+// the thing that makes her read as an owl rather than a white blob: a round
+// tuftless head, a facial disc, two amber eyes and a hooked beak. Wings carry
+// separated primary "fingers" and light barring instead of a smooth curve.
+
+// One wing, drawn from the shoulder outward along +x, then rotated by `rot`.
+function drawWing(ctx, s, rot, fill, barring) {
+  const L = 30 * s;
+  ctx.save();
+  ctx.rotate(rot);
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.quadraticCurveTo(L * 0.45, -L * 0.32, L, -L * 0.08); // leading edge
+  // four primary feather tips along the outer trailing edge
+  const tips = [[0.86, 0.10], [0.70, 0.19], [0.53, 0.24], [0.36, 0.25]];
+  let px = L, py = -L * 0.08;
+  for (const [fx, fy] of tips) {
+    const tx = L * fx, ty = L * fy;
+    ctx.quadraticCurveTo((px + tx) / 2 + L * 0.04, (py + ty) / 2 + L * 0.09, tx, ty);
+    px = tx; py = ty;
+  }
+  ctx.quadraticCurveTo(L * 0.18, L * 0.22, 0, L * 0.07); // inner trailing edge
+  ctx.closePath();
+  ctx.fillStyle = fill;
+  ctx.fill();
+  // sparse dark barring, the snowy owl's speckling
+  ctx.strokeStyle = barring;
+  ctx.lineWidth = 0.9 * s;
+  ctx.lineCap = 'round';
+  for (let i = 1; i <= 3; i++) {
+    const fx = 0.34 + i * 0.17;
+    ctx.beginPath();
+    ctx.moveTo(L * fx, -L * 0.10);
+    ctx.lineTo(L * (fx - 0.03), L * 0.10);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
 function draw(ctx) {
   if (state !== 'gliding') return;
   const s = 1.8;
@@ -75,31 +114,71 @@ function draw(ctx) {
   ctx.translate(x, y);
   ctx.scale(dir, 1);
 
-  // wings: gray undersides
-  ctx.fillStyle = 'rgba(190,192,208,0.55)';
-  for (const sgn of [1, -1]) {
+  // Far wing first, dimmer so it reads as behind her. Both wings sweep back
+  // (rot near PI points along -x); the far one rides high, the near one low,
+  // which is what makes a side-on bird look like it's mid-beat.
+  drawWing(ctx, s, Math.PI + 0.45 + wingAngle * 0.5, 'rgba(226,229,243,0.74)', 'rgba(128,132,158,0.26)');
+
+  // tail: short fan sweeping back
+  ctx.fillStyle = 'rgba(238,238,248,0.90)';
+  ctx.beginPath();
+  ctx.moveTo(-6 * s, -1 * s);
+  ctx.quadraticCurveTo(-15 * s, -3 * s, -18 * s, 1 * s);
+  ctx.quadraticCurveTo(-15 * s, 4 * s, -6 * s, 3 * s);
+  ctx.closePath();
+  ctx.fill();
+
+  // body: tapered toward the tail
+  ctx.fillStyle = 'rgba(250,249,255,0.95)';
+  ctx.beginPath();
+  ctx.ellipse(-1 * s, 0.5 * s, 10.5 * s, 7 * s, -0.06, 0, Math.PI * 2);
+  ctx.fill();
+  // belly speckling
+  ctx.fillStyle = 'rgba(150,152,175,0.22)';
+  [[-5, 2.4], [-2, 3.6], [1.5, 2.8], [-3.5, -1.2]].forEach(([bx, by]) => {
     ctx.beginPath();
-    ctx.moveTo(0, -2 * s);
-    ctx.quadraticCurveTo(sgn * 18 * s, (-14 - wingAngle * 14) * s, sgn * 30 * s, (-2 - wingAngle * 6) * s);
-    ctx.quadraticCurveTo(sgn * 14 * s, 4 * s, 0, -2 * s);
-    ctx.closePath();
+    ctx.ellipse(bx * s, by * s, 1.15 * s, 0.6 * s, 0, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // near wing, brighter and in front
+  drawWing(ctx, s, Math.PI - 0.32 - wingAngle * 0.5, 'rgba(252,252,255,0.95)', 'rgba(132,136,164,0.34)');
+
+  // ── head, turned to face the viewer ──
+  const hx = 8.5 * s, hy = -4.2 * s, hr = 5.6 * s;
+  ctx.fillStyle = 'rgba(253,253,255,0.98)';
+  ctx.beginPath();
+  ctx.arc(hx, hy, hr, 0, Math.PI * 2);
+  ctx.fill();
+  // facial disc: two soft lobes around the eyes
+  ctx.fillStyle = 'rgba(236,238,248,0.95)';
+  for (const sgn of [-1, 1]) {
+    ctx.beginPath();
+    ctx.ellipse(hx + sgn * hr * 0.36, hy + hr * 0.06, hr * 0.46, hr * 0.60, sgn * 0.18, 0, Math.PI * 2);
     ctx.fill();
   }
-
-  // body: white
-  ctx.fillStyle = 'rgba(248,246,255,0.92)';
+  // eyes: amber iris, dark pupil, catchlight
+  for (const sgn of [-1, 1]) {
+    const ex = hx + sgn * hr * 0.38, ey = hy - hr * 0.04;
+    ctx.fillStyle = 'rgba(238,176,42,0.98)';
+    ctx.beginPath();
+    ctx.arc(ex, ey, hr * 0.30, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(16,12,22,0.95)';
+    ctx.beginPath();
+    ctx.arc(ex, ey, hr * 0.15, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.beginPath();
+    ctx.arc(ex - hr * 0.07, ey - hr * 0.09, hr * 0.055, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // small hooked beak between and just below the eyes
+  ctx.fillStyle = 'rgba(46,40,54,0.92)';
   ctx.beginPath();
-  ctx.ellipse(0, 0, 10 * s, 7 * s, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // small head accent
-  ctx.beginPath();
-  ctx.fillStyle = 'rgba(255,255,255,0.95)';
-  ctx.arc(6 * s, -2 * s, 3.4 * s, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.fillStyle = 'rgba(20,16,28,0.85)';
-  ctx.arc(7.4 * s, -2.6 * s, 0.9 * s, 0, Math.PI * 2);
+  ctx.moveTo(hx - hr * 0.10, hy + hr * 0.20);
+  ctx.quadraticCurveTo(hx, hy + hr * 0.62, hx + hr * 0.10, hy + hr * 0.20);
+  ctx.closePath();
   ctx.fill();
 
   // letter, swinging beneath on a short pendulum
