@@ -119,7 +119,9 @@ export const YEARS = [
 const LESSON_PASS = 6;
 const EXAM_PASS = 14;
 const HOUSE_EMOJI = { gryffindor: '🦁', slytherin: '🐍', ravenclaw: '🦅', hufflepuff: '🦡' };
-const HOUSE_COLOR = { gryffindor: '#d3a625', slytherin: '#2ea86e', ravenclaw: '#6c9fd8', hufflepuff: '#e3b53d' };
+// Keep in sync with the --accent values in css/base.css — Gryffindor is
+// scarlet, not gold, so it can't be mistaken for Hufflepuff in the House Cup.
+const HOUSE_COLOR = { gryffindor: '#c23b3b', slytherin: '#2ea86e', ravenclaw: '#6c9fd8', hufflepuff: '#e3b53d' };
 
 // ─── PERSISTENCE (hp_journey v2) ─────────────────────────────────────────────
 let state = null;
