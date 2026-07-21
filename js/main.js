@@ -28,7 +28,7 @@ import { SPELLS } from './arsenal.js';
 import { Guide } from './guide.js';
 import { Settings } from './settings.js';
 import { Sync, setConflictHandler } from './sync.js';
-import { buildPanel, repaint as repaintCloud, showConflict } from './sync-ui.js';
+import { buildPanel, repaint as repaintCloud, showConflict, maybeNudgeCloudSave } from './sync-ui.js';
 
 // ─── FX / sky / cursor init (must run before other listeners use FX) ────────
 FX.init();
@@ -151,3 +151,7 @@ Settings.setCloudPanel(buildPanel(), repaintCloud, () => Sync.forcePushLocal());
 setConflictHandler(showConflict);
 Sync.onChange(repaintCloud);
 Sync.init();
+// A one-time nudge toward cloud save, not a gate — fires right after a
+// first-time Sorting, once there's a house worth keeping and nothing is
+// covering the screen. Skipped if already signed in.
+Journey.setSortedCallback(maybeNudgeCloudSave);

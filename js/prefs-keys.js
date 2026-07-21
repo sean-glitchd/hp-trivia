@@ -10,8 +10,9 @@
 // derived rather than hand-listed, so a new key can't be silently forgotten.
 
 export const NUDGE_KEY = 'hp_sound_nudge';
+export const CLOUD_NUDGE_KEY = 'hp_cloud_nudge';
 
-export const PREF_KEYS = ['hp_sound', 'hp_track', 'hp_volume', 'hp_voice', 'hp_motion', NUDGE_KEY];
+export const PREF_KEYS = ['hp_sound', 'hp_track', 'hp_volume', 'hp_voice', 'hp_motion', NUDGE_KEY, CLOUD_NUDGE_KEY];
 
 // Keys sync.js owns but must never upload (bookkeeping about syncing itself).
 export const SYNC_META_KEYS = ['hp_cloud_session', 'hp_cloud_meta'];

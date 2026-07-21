@@ -17,6 +17,13 @@ import { Gesture } from './gesture.js';
 import { Cards } from './cards.js';
 import { Guide } from './guide.js';
 
+// Fired once, right after a first-time Sorting completes (see revealHouse's
+// Continue handler below) — the exact moment nothing is covering the screen
+// and the player has a house worth keeping. Set by main.js so this module
+// never imports sync/cloud directly (same outward-callback shape as
+// Nav.setHomeCallback / Hedwig.setLetterCallback).
+let onSortedCallback = null;
+
 // Once-per-session set of years that have already run their typing challenge,
 // so the "Cast the spell!" interstitial fires at most once per year per visit.
 const typingDoneThisSession = new Set();
@@ -1032,7 +1039,10 @@ function revealHouse(house) {
     refreshCTA();
     ensureUsedYear(1);
     // Hagrid's walkthrough plays once, right after Sorting, then into Year 1.
-    Guide.playBeatOnce('journey-intro', () => showIntro('lesson', 1, 0, 'screen-sorting'));
+    Guide.playBeatOnce('journey-intro', () => {
+      showIntro('lesson', 1, 0, 'screen-sorting');
+      if (onSortedCallback) onSortedCallback();
+    });
   });
 }
 
@@ -1107,6 +1117,8 @@ export const Journey = {
   },
 
   refreshCTA,
+
+  setSortedCallback(fn) { onSortedCallback = fn; },
 
   // Daily Prophet banks its score into the House Cup only when a journey is in
   // progress; a no-op otherwise (quick-play-only or pre-journey players).

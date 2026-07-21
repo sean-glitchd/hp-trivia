@@ -9,8 +9,22 @@
 import { Sync } from './sync.js';
 import { ERR, validateUsername } from './cloud.js';
 import { showToast } from './quiz.js';
+import { CLOUD_NUDGE_KEY } from './prefs-keys.js';
 
 let statusEl = null, actionBtn = null, panelEl = null;
+
+// One-time, non-blocking pointer to cloud save — fired by journey.js right
+// after a first-time Sorting, once the player has a house worth keeping and
+// nothing (the reveal overlay, Hagrid's dialogue box) is covering the screen.
+// Not a gate: the game already saves locally regardless, so there's nothing to
+// decide here, just something to notice. Skipped entirely if already signed
+// in — nudging someone who already has an account is just noise.
+export function maybeNudgeCloudSave() {
+  if (Sync.getState() !== 'signed-out') return;
+  if (localStorage.getItem(CLOUD_NUDGE_KEY)) return;
+  try { localStorage.setItem(CLOUD_NUDGE_KEY, '1'); } catch (e) { /* ignore */ }
+  showToast('Want to keep this on other devices too? Look for ☁️ in Settings.');
+}
 
 function h(tag, cls, text) {
   const el = document.createElement(tag);
