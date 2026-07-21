@@ -1,2 +1,10 @@
 .vercel
 .DS_Store
+
+# Belt-and-braces: this repo is public and has no build step, so any secret that
+# lands here ships to the browser and to GitHub. The Supabase *anon* key is
+# meant to be public and lives in js/supabase-config.js; the *service_role* key
+# must never be committed anywhere, in any form.
+.env
+.env.*
+*.local

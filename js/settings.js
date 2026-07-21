@@ -14,12 +14,11 @@ import { isVoiceOn, setVoiceOn, onVoiceChange } from './dialogue.js';
 import { FX, getMotionPref, setMotionPref } from './fx.js';
 import { showToast } from './quiz.js';
 import { resetProgress } from './journey.js';
+import { NUDGE_KEY, PREF_KEYS, LOCAL_ONLY_KEYS } from './prefs-keys.js';
 
-const NUDGE_KEY = 'hp_sound_nudge';
-// Preferences survive an "erase everything" — wiping someone's volume as
-// collateral for deleting a save is a surprise, and re-muting is the first
-// thing they'd have to redo.
-const PREF_KEYS = ['hp_sound', 'hp_track', 'hp_volume', 'hp_voice', 'hp_motion', NUDGE_KEY];
+// Re-exported so existing importers keep working now the definition lives in a
+// leaf shared with sync.js (see prefs-keys.js for why it has to be shared).
+export { PREF_KEYS };
 const MOTION_OPTS = [
   ['auto', 'Auto'],
   ['full', 'Full'],
@@ -227,8 +226,12 @@ function showEraseConfirm() {
 }
 
 function eraseEverything() {
+  // LOCAL_ONLY_KEYS, not just PREF_KEYS: the cloud session has to survive the
+  // clear() below, or the child is signed out mid-erase and the matching wipe
+  // never reaches the cloud — leaving a full save online that "erase
+  // everything" claimed to delete.
   const keep = {};
-  PREF_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v !== null) keep[k] = v; });
+  LOCAL_ONLY_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v !== null) keep[k] = v; });
   try { localStorage.clear(); } catch (e) { /* ignore */ }
   Object.entries(keep).forEach(([k, v]) => { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } });
   // Cards and Daily hold in-memory caches with no reset API, so a reload is the

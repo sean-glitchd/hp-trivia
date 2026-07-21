@@ -4,7 +4,7 @@
 
 import {
   startRound, renderResultShell, switchScreen, getPoints, updateWelcomeScreen,
-  setJourneyHouse, applyJourneyHouse, getJourneyHouse, showToast,
+  setJourneyHouse, applyJourneyHouse, getJourneyHouse, showToast, unlockExpert,
 } from './quiz.js';
 import { allQuestions, HOUSES } from './questions.js';
 import * as Dialogue from './dialogue.js';
@@ -695,7 +695,7 @@ function journeyRoundEnd(kind, year, lesson, score, total) {
       completedJourney = true;
       const rows = cupStandings();
       state.cupWon = rows.length > 0 && rows[0].isPlayer;
-      localStorage.setItem('hp_expert_unlocked', 'true');
+      unlockExpert();
     }
   }
   save();
@@ -772,7 +772,7 @@ function duelComplete({ victory, points, action }) {
       const rows = cupStandings();
       state.cupWon = rows.length > 0 && rows[0].isPlayer;
       if (state.cupWon) Cards.award('harry'); // House Cup won on completion
-      localStorage.setItem('hp_expert_unlocked', 'true');
+      unlockExpert();
     }
   }
   save();

@@ -40,7 +40,10 @@ function isExpertUnlocked() {
   return localStorage.getItem('hp_expert_unlocked') === 'true';
 }
 
-function unlockExpert() {
+// Exported so journey.js writes the unlock through here rather than setting the
+// key itself — one writer per progress key is what lets sync.js reason about
+// changes without chasing scattered setItem calls.
+export function unlockExpert() {
   localStorage.setItem('hp_expert_unlocked', 'true');
 }
 
