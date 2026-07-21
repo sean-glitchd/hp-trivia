@@ -58,6 +58,29 @@ export const AudioEngine = {
     if (this.ctx.state === 'suspended') this.ctx.resume();
   },
 
+  // Backgrounding a tab (or a device sleeping, or an iOS call/notification)
+  // suspends the AudioContext. Its clock then freezes, so scheduleAmbient()'s
+  // `nextNoteTime < ctx.currentTime` test never passes again and the synth goes
+  // permanently silent — while musicTimer keeps ticking, so nothing looks wrong.
+  // Browsers also pause the theme <audio> without firing 'ended'. Nothing used
+  // to bring either back, so music just stopped for good. Called on tab focus.
+  _recoverPlayback() {
+    if (!this.enabled || !this.ctx) return;
+    const afterResume = () => {
+      // Re-anchor the scheduler: the clock may have jumped while we were away,
+      // and a stale nextNoteTime would fire a burst of catch-up notes at once.
+      this.nextNoteTime = this.ctx.currentTime + 0.1;
+      if (this.duelActive) return;
+      if (this.activeTrack === 'theme' && this.themeAudio && this.themeAudio.paused) {
+        this.themeAudio.play().catch(() => { /* needs a fresh gesture — the unlock listener covers it */ });
+      } else if (this.activeTrack && this.activeTrack !== 'theme' && !this.musicTimer) {
+        this.startAmbient(); // scheduler died with the context — restart it
+      }
+    };
+    if (this.ctx.state === 'running') { afterResume(); return; }
+    this.ctx.resume().then(afterResume).catch(() => { /* blocked until a gesture */ });
+  },
+
   // ─── ducking: dialogue.js quiets the music while a voice line speaks ──────
   // Depth-counted so overlapping duck/restore calls (e.g. a clip erroring and
   // immediately falling back to Web Speech) never leave music stuck low —
@@ -591,4 +614,10 @@ export function initAudioListeners() {
     AudioEngine.updateButtons(); // clears the "tap to start" pending state
   };
   EVENTS.forEach(e => document.addEventListener(e, unlock));
+
+  // Coming back to the tab is the moment to undo a browser-imposed suspend.
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) AudioEngine._recoverPlayback();
+  });
+  window.addEventListener('focus', () => AudioEngine._recoverPlayback());
 }
