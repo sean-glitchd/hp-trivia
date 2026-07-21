@@ -688,3 +688,39 @@ body.quill-mode, body.quill-mode * {
 }
 .volume-slider::-moz-range-track { height: 5px; border-radius: 4px; background: rgba(201,168,76,0.28); }
 @media (max-width: 480px) { .volume-slider { width: 64px; } }
+
+/* ── Cloud save ─────────────────────────────────────────────────────────── */
+.cloud-slot { display: flex; justify-content: flex-end; }
+.cloud-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.cloud-status { font-size: 0.76rem; color: rgba(245,230,200,0.75); }
+.cloud-action { padding: 5px 12px; font-size: 0.72rem; }
+
+.cloud-auth-card { max-width: 400px; text-align: left; }
+.cloud-blurb { color: rgba(245,230,200,0.7); font-size: 0.82rem; line-height: 1.5; margin-bottom: 16px; }
+.cloud-auth-form { display: flex; flex-direction: column; gap: 14px; margin-bottom: 12px; }
+.cloud-field { display: flex; flex-direction: column; gap: 5px; }
+.cloud-label { font-family: 'Cinzel', serif; font-size: 0.78rem; color: var(--parchment); letter-spacing: 0.04em; }
+.cloud-hint { font-size: 0.7rem; color: rgba(245,230,200,0.45); font-style: italic; line-height: 1.4; }
+.cloud-input-wrap { position: relative; display: flex; }
+.cloud-input { width: 100%; }
+.cloud-eye {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  background: none; border: 0; cursor: pointer; font-size: 0.95rem;
+  opacity: 0.45; padding: 4px;
+}
+.cloud-eye.on, .cloud-eye:hover { opacity: 0.9; }
+.cloud-error { color: #ff8a8a; font-size: 0.8rem; line-height: 1.45; min-height: 1.2em; margin-bottom: 10px; }
+.cloud-swap { display: block; margin: 14px auto 0; font-size: 0.75rem; }
+
+/* Conflict choices — numbers a child can actually compare. */
+.cloud-choice {
+  display: flex; flex-direction: column; gap: 2px;
+  border: 1px solid rgba(201,168,76,0.28); border-radius: 10px;
+  padding: 10px 12px; margin-bottom: 10px; text-align: left;
+}
+.cloud-choice strong { font-family: 'Cinzel', serif; font-size: 0.8rem; color: var(--accent-light); }
+.cloud-choice span { font-size: 0.78rem; color: rgba(245,230,200,0.75); }
+
+@media (max-width: 480px) {
+  .cloud-row { justify-content: space-between; width: 100%; }
+}

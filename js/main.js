@@ -27,6 +27,8 @@ import { Hedwig } from './hedwig.js';
 import { SPELLS } from './arsenal.js';
 import { Guide } from './guide.js';
 import { Settings } from './settings.js';
+import { Sync, setConflictHandler } from './sync.js';
+import { buildPanel, repaint as repaintCloud, showConflict } from './sync-ui.js';
 
 // ─── FX / sky / cursor init (must run before other listeners use FX) ────────
 FX.init();
@@ -141,3 +143,11 @@ Nav.setHomeCallback(() => {
   Journey.refreshCTA();
 });
 Settings.init(); // owns the voice, track, volume and motion controls
+
+// ─── Cloud save ──────────────────────────────────────────────────────────────
+// Wired here so settings.js never imports sync/cloud and gameplay never awaits
+// the network: if any of this fails, the game is exactly what it was before.
+Settings.setCloudPanel(buildPanel(), repaintCloud, () => Sync.forcePushLocal());
+setConflictHandler(showConflict);
+Sync.onChange(repaintCloud);
+Sync.init();

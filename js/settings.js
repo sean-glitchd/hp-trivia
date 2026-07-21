@@ -28,6 +28,11 @@ const MOTION_OPTS = [
 let gearBtn = null;
 let overlay = null;
 let lastFocus = null;
+let cloudSlot = null;
+let cloudRepaint = null;
+// Set by main.js. Called after a local wipe so sync can force-push it, rather
+// than settings.js reaching into sync directly.
+let onProgressWiped = null;
 
 function h(tag, cls, text) {
   const el = document.createElement(tag);
@@ -149,6 +154,12 @@ function buildDOM() {
   motionRow.classList.add('settings-row-stack');
   card.appendChild(motionRow);
 
+  // ── cloud save ──
+  // Container only; sync-ui.js fills it via setCloudPanel(). settings.js must
+  // not import sync/cloud, so the content is pushed in from main.js instead.
+  cloudSlot = h('div', 'cloud-slot');
+  card.appendChild(row('Cloud save', cloudSlot, 'Play on any device'));
+
   // ── destructive ──
   const danger = h('div', 'settings-danger');
   const resetJourneyBtn = h('button', 'link-btn settings-danger-btn', 'Reset journey');
@@ -156,6 +167,9 @@ function buildDOM() {
   resetJourneyBtn.title = 'Clear journey progress, name and house';
   armTwoTap(resetJourneyBtn, 'Reset journey', 'Tap again to reset your journey', () => {
     resetProgress();
+    // Push immediately rather than waiting for the debounce — otherwise a pull
+    // could land first and resurrect the journey that was just cleared.
+    if (onProgressWiped) onProgressWiped();
     showToast('Journey reset.');
   });
   const eraseBtn = h('button', 'link-btn settings-danger-btn', 'Erase everything');
@@ -179,6 +193,15 @@ function buildDOM() {
   overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
 
   overlay._paints = [soundSwitch._paint, trackChoices._paint, motionChoices._paint];
+}
+
+// main.js injects the cloud controls here so settings.js takes no dependency on
+// sync/cloud (same outward-callback shape as Nav.setHomeCallback).
+function setCloudPanel(el, repaintFn, onWiped) {
+  if (cloudSlot && el) { cloudSlot.innerHTML = ''; cloudSlot.appendChild(el); }
+  cloudRepaint = repaintFn || null;
+  onProgressWiped = onWiped || null;
+  if (cloudRepaint && overlay && overlay._paints) overlay._paints.push(cloudRepaint);
 }
 
 // The milder reset keeps the two-tap pattern already used in Journey.
@@ -210,8 +233,8 @@ function showEraseConfirm() {
       <p class="settings-confirm-title">Erase everything?</p>
       <p class="settings-confirm-text">
         This deletes your journey, house, name, spell charges, Frog Card collection,
-        Daily Prophet streak and Expert unlock. Sound and display preferences are kept.
-        This cannot be undone.
+        Daily Prophet streak and Expert unlock — on this device and in your cloud save.
+        Sound and display preferences are kept. This cannot be undone.
       </p>
       <div class="settings-confirm-btns">
         <button class="play-again-btn settings-cancel" type="button">Cancel</button>
@@ -225,7 +248,7 @@ function showEraseConfirm() {
   cancel.focus(); // safe option holds focus
 }
 
-function eraseEverything() {
+async function eraseEverything() {
   // LOCAL_ONLY_KEYS, not just PREF_KEYS: the cloud session has to survive the
   // clear() below, or the child is signed out mid-erase and the matching wipe
   // never reaches the cloud — leaving a full save online that "erase
@@ -234,6 +257,17 @@ function eraseEverything() {
   LOCAL_ONLY_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v !== null) keep[k] = v; });
   try { localStorage.clear(); } catch (e) { /* ignore */ }
   Object.entries(keep).forEach(([k, v]) => { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } });
+  // Send the emptied state up before reloading, or the confirm's promise that
+  // the cloud copy goes too would be a lie. Bounded so a dead network delays
+  // the reload by a moment rather than blocking it.
+  if (onProgressWiped) {
+    try {
+      await Promise.race([
+        Promise.resolve(onProgressWiped()),
+        new Promise(r => setTimeout(r, 3000)),
+      ]);
+    } catch (e) { /* erase locally regardless */ }
+  }
   // Cards and Daily hold in-memory caches with no reset API, so a reload is the
   // honest way to make a full wipe actually show everywhere.
   location.reload();
@@ -304,4 +338,5 @@ export const Settings = {
   },
   open,
   close,
+  setCloudPanel,
 };
