@@ -364,10 +364,16 @@ function resetClick() {
   resetArmed = false;
   btn.textContent = 'Reset journey';
   btn.classList.remove('armed');
-  // Full fresh start: wipe journey progress, identity, the walkthrough-seen
-  // flags, and journey-earned spells. KEEP the Frog Card collection, Daily
-  // streak, and sound prefs (and the quick-play Expert unlock). Clear both
-  // storage and the modules' in-memory caches so it takes effect immediately.
+  resetProgress();
+  switchScreen('screen-journey', 'screen-welcome', updateWelcomeScreen);
+}
+
+// Full fresh start: wipe journey progress, identity, the walkthrough-seen
+// flags, and journey-earned spells. KEEP the Frog Card collection, Daily
+// streak, and sound prefs (and the quick-play Expert unlock). Clears both
+// storage and the modules' in-memory caches so it takes effect immediately.
+// Exported so the settings panel can reuse it rather than duplicating the list.
+export function resetProgress() {
   ['hp_journey', 'hp_name', 'hp_house', 'hp_seen', 'hp_arsenal'].forEach(k => localStorage.removeItem(k));
   state = freshState();
   usedSet.clear(); usedYear = 0;
@@ -375,7 +381,6 @@ function resetClick() {
   Guide.resetSeen();    // Hagrid's walkthrough replays this session
   Arsenal.reset();      // starter kit re-grants on the next journey entry
   refreshCTA();
-  switchScreen('screen-journey', 'screen-welcome', updateWelcomeScreen);
 }
 
 // name edit (inline swap)

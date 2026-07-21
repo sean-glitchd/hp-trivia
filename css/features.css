@@ -141,6 +141,102 @@
 .nav-confirm-btns { display: flex; gap: 10px; }
 .nav-confirm-btns .play-again-btn { flex: 1; }
 
+/* ── Settings panel ─────────────────────────────────────────────────────────
+   Cribs .nav-confirm-overlay/.nav-confirm-card above. z-index 410 sits above
+   nav-confirm (400) and the guide box (360), below the house reveal (500). */
+.settings-overlay {
+  position: fixed; inset: 0;
+  background: rgba(10,5,20,0.72);
+  z-index: 410;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+/* loads after base.css, so re-assert (same reason as the nav rule above) */
+.settings-overlay.hidden, #settings-slots.hidden { display: none; }
+.settings-card {
+  background: rgba(20,10,36,0.97);
+  border: 1px solid var(--accent);
+  border-radius: 14px;
+  padding: 24px 26px;
+  max-width: 400px; width: 100%;
+  max-height: 86vh; overflow-y: auto;
+  box-shadow: 0 14px 50px rgba(0,0,0,0.6);
+}
+.settings-title {
+  font-family: 'Cinzel Decorative', cursive;
+  color: var(--accent-light);
+  font-size: 1.25rem; text-align: center; margin-bottom: 6px;
+}
+.settings-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(201,168,76,0.15);
+}
+.settings-row-stack { flex-direction: column; align-items: stretch; gap: 8px; }
+.settings-row-label { display: flex; flex-direction: column; gap: 2px; }
+.settings-label { font-family: 'Cinzel', serif; font-size: 0.86rem; color: var(--parchment); letter-spacing: 0.04em; }
+.settings-hint { font-size: 0.72rem; color: rgba(245,230,200,0.5); font-style: italic; }
+.settings-inline { display: flex; align-items: center; }
+
+.settings-switch {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(201,168,76,0.35);
+  border-radius: 9px; padding: 6px 16px;
+  color: var(--parchment); font-family: 'Cinzel', serif; font-size: 0.78rem;
+  cursor: pointer; min-width: 62px;
+}
+.settings-switch[aria-checked="true"] {
+  border-color: var(--accent); color: var(--accent-light);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+.settings-choices { display: flex; flex-wrap: wrap; gap: 6px; }
+.settings-choice {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(201,168,76,0.35);
+  border-radius: 9px; padding: 6px 11px;
+  color: var(--parchment); font-family: 'Cinzel', serif; font-size: 0.75rem;
+  cursor: pointer;
+}
+.settings-choice[aria-checked="true"] {
+  border-color: var(--accent); color: var(--accent-light);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+/* the slider is 84px in the corner cluster; give it the room it has here */
+.settings-row .volume-slider { width: auto; flex: 1; max-width: 160px; }
+
+.settings-danger { display: flex; flex-direction: column; gap: 2px; padding-top: 14px; }
+.settings-danger-btn { margin: 0 auto; }
+.settings-danger-btn.armed { color: #ff8a8a; }
+.settings-done { display: block; width: 100%; margin-top: 16px; }
+
+/* Layered over the settings card — destructive, so it takes a real dialog. */
+.settings-confirm {
+  position: fixed; inset: 0;
+  background: rgba(10,5,20,0.82);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.settings-confirm-title { font-family: 'Cinzel', serif; color: #ff8a8a; font-size: 1.05rem; margin-bottom: 10px; }
+.settings-confirm-text { color: var(--parchment); font-size: 0.86rem; line-height: 1.6; margin-bottom: 18px; }
+.settings-confirm-card {
+  background: rgba(20,10,36,0.98);
+  border: 1px solid #a34a4a; border-radius: 14px;
+  padding: 24px 26px; max-width: 380px; width: 100%; text-align: center;
+  box-shadow: 0 14px 50px rgba(0,0,0,0.7);
+}
+.settings-confirm-btns { display: flex; gap: 10px; }
+.settings-confirm-btns .play-again-btn { flex: 1; }
+
+/* Sound is on as a setting, but autoplay policy holds playback until the first
+   gesture — dim it so the button isn't claiming to play when it isn't. */
+#music-toggle.pending { opacity: 0.55; }
+
+@media (max-width: 480px) {
+  .settings-card { padding: 20px 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .settings-overlay, .settings-confirm { transition: none !important; }
+}
+
 /* ── Welcome hero CTA + mode divider ────────────────────────────────────── */
 .journey-cta-btn {
   display: block;
@@ -191,10 +287,6 @@
   color: rgba(245,230,200,0.4);
   white-space: nowrap;
 }
-
-/* ── 🗣️ voice toggle ────────────────────────────────────────────────────── */
-#voice-toggle { opacity: 0.55; }
-#voice-toggle.active { opacity: 1; border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
 
 /* ── Small link-style buttons (journey screens) ─────────────────────────── */
 .link-btn {

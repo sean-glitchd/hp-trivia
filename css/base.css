@@ -20,6 +20,11 @@
   @media (prefers-reduced-motion: reduce) {
     body, body * { transition-duration: 0.05s !important; }
   }
+  /* Mirrors the clamp above for the in-app Motion setting (fx.js sets the
+     attribute). Note a media query can't be un-applied by an attribute, so
+     choosing "Full" on an OS that requests reduced motion still leaves the
+     per-component reduced-motion blocks active. */
+  body[data-motion="reduced"], body[data-motion="reduced"] * { transition-duration: 0.05s !important; }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 

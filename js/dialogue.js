@@ -248,6 +248,17 @@ export function isVoiceOn() {
   return localStorage.getItem('hp_voice') === 'on';
 }
 
+// Single writer for the preference, so the settings panel and the 🗣️ toggle
+// can't drift apart. Listeners let the panel repaint when the button is used.
+const voiceListeners = [];
+export function onVoiceChange(fn) { voiceListeners.push(fn); }
+
+export function setVoiceOn(on) {
+  try { localStorage.setItem('hp_voice', on ? 'on' : 'off'); } catch (e) { /* ignore */ }
+  if (!on) cancelSpeech();
+  voiceListeners.forEach(f => { try { f(); } catch (e) { /* ignore */ } });
+}
+
 // Per-character voice character: pitch (lower = deeper) + rate (lower = slower),
 // with a gender hint used when the device offers both. Browser TTS is still
 // synthetic, but distinct pitch/rate + a good system voice reads far less flat.
@@ -374,19 +385,5 @@ export function cancelSpeech() {
   try { window.speechSynthesis.cancel(); } catch (e) { /* no-op */ }
 }
 
-// ─── 🗣️ voice toggle button (lives in .sound-controls) ──────────────────────
-export function initVoiceToggle() {
-  const btn = document.getElementById('voice-toggle');
-  if (!btn) return;
-  const refresh = () => {
-    const on = isVoiceOn();
-    btn.setAttribute('aria-pressed', String(on));
-    btn.classList.toggle('active', on);
-  };
-  btn.addEventListener('click', () => {
-    localStorage.setItem('hp_voice', isVoiceOn() ? 'off' : 'on');
-    if (!isVoiceOn()) cancelSpeech();
-    refresh();
-  });
-  refresh();
-}
+// The 🗣️ corner button was retired — the settings panel owns the voice toggle
+// now (see js/settings.js), reading/writing through isVoiceOn()/setVoiceOn().

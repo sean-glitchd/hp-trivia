@@ -7,6 +7,7 @@
 
 import { AudioEngine } from './audio.js';
 import * as Dialogue from './dialogue.js';
+import { FX } from './fx.js';
 
 const KEY = 'hp_seen';
 
@@ -116,9 +117,9 @@ function typeLine(line) {
 
   if (AudioEngine && line.text) Dialogue.speakLine({ id: line.id, char: line.key, text: fullText }); // no-ops unless voice on
 
-  // Typewriter — instant under reduced motion.
-  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduced) { textEl.textContent = fullText; typing = false; advanceEl.classList.remove('hidden'); return; }
+  // Typewriter — instant under reduced motion. Reads FX.reduced so the in-app
+  // Motion setting applies here too, not just the OS preference.
+  if (FX.reduced) { textEl.textContent = fullText; typing = false; advanceEl.classList.remove('hidden'); return; }
   textEl.textContent = '';
   typing = true;
   let i = 0;

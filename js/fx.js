@@ -92,9 +92,42 @@ function setColor(p, rgb) {
   p.r = rgb.r; p.g = rgb.g; p.b = rgb.b;
 }
 
+// ─── motion preference ────────────────────────────────────────────────────────
+// 'auto' follows the OS; 'full'/'reduced' are explicit user overrides set from
+// the settings panel. FX.reduced is a getter (not a snapshot) so both an
+// override change and a live OS change take effect without a reload.
+const REDUCED_QUERY = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+let motionPref = ['auto', 'full', 'reduced'].includes(localStorage.getItem('hp_motion'))
+  ? localStorage.getItem('hp_motion') : 'auto';
+
+export function getMotionPref() { return motionPref; }
+
+export function setMotionPref(pref) {
+  if (!['auto', 'full', 'reduced'].includes(pref)) return;
+  motionPref = pref;
+  try { localStorage.setItem('hp_motion', pref); } catch (e) { /* ignore */ }
+  syncMotionAttr();
+}
+
+// Mirrors the resolved value onto <body> so CSS can react to the override.
+// NOTE: this only drives the global transition clamp in base.css — the
+// per-component @media (prefers-reduced-motion) blocks still follow the OS
+// only, so 'full' cannot un-apply those. See the plan's Phase 2.
+function syncMotionAttr() {
+  if (document.body) document.body.dataset.motion = FX.reduced ? 'reduced' : 'full';
+}
+
+if (REDUCED_QUERY && REDUCED_QUERY.addEventListener) {
+  REDUCED_QUERY.addEventListener('change', syncMotionAttr);
+}
+
 // ─── FX object ────────────────────────────────────────────────────────────────
 export const FX = {
-  reduced: window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  get reduced() {
+    if (motionPref === 'reduced') return true;
+    if (motionPref === 'full') return false;
+    return !!(REDUCED_QUERY && REDUCED_QUERY.matches);
+  },
   skyCanvas: null,
   fxCanvas: null,
   skyCtx: null,
@@ -107,6 +140,7 @@ export const FX = {
 
   init() {
     if (this.skyCanvas) return; // already initialized
+    syncMotionAttr();
 
     this.skyCanvas = document.createElement('canvas');
     this.skyCanvas.id = 'sky-canvas';

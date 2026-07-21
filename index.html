@@ -9,17 +9,22 @@
 <link rel="stylesheet" href="css/components.css?v=2">
 <link rel="stylesheet" href="css/effects.css?v=2">
 <link rel="stylesheet" href="css/journey.css?v=3">
-<link rel="stylesheet" href="css/features.css?v=9">
+<link rel="stylesheet" href="css/features.css?v=10">
 </head>
 <body>
 
 <div class="toast" id="snitch-toast" role="status"></div>
 
+<!-- Corner chrome is just quick-mute + the settings button (added by js/settings.js).
+     Everything else lives in the settings panel, which adopts the controls below. -->
 <div class="sound-controls">
-  <button id="music-toggle" class="sound-btn" aria-pressed="false" aria-label="Toggle sound">🔇</button>
-  <button id="voice-toggle" class="sound-btn" aria-pressed="false" aria-label="Toggle spoken voice">🗣️</button>
-  <button id="track-toggle" class="sound-btn track-btn hidden" aria-label="Switch music track">🎵 Theme</button>
-  <input id="volume-slider" class="volume-slider" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume">
+  <button id="music-toggle" class="sound-btn" aria-pressed="false" aria-label="Toggle sound" title="Sound is off">🔇</button>
+</div>
+
+<!-- Parked here so it exists at parse time (main.js wires it by id);
+     settings.js moves it into the panel at init. -->
+<div id="settings-slots" class="hidden">
+  <input id="volume-slider" class="volume-slider" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume" title="Volume">
 </div>
 
 <div class="container">

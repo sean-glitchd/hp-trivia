@@ -1,10 +1,28 @@
+// TRACK_ORDER holds only real, playable tracks. SELECTABLE adds the 'shuffle'
+// pseudo-track, which is a *selection* the player can persist but never a
+// track that actually plays — _resolveTrack() maps it to a real one.
 const TRACK_ORDER = ['theme', 'ambient', 'common', 'hall'];
-const TRACK_LABELS = { theme: '🎵 Theme', ambient: '✨ Ambient', common: '🛋️ Common Room', hall: '🕯️ Great Hall' };
+export const SELECTABLE = [...TRACK_ORDER, 'shuffle'];
+export const TRACK_LABELS = { theme: '🎵 Theme', ambient: '✨ Ambient', common: '🛋️ Common Room', hall: '🕯️ Great Hall', shuffle: '🔀 Shuffle' };
+// How far music ducks under a spoken line (shared by duckMusic and the
+// shuffle handoff, which has to match it when swapping tracks mid-duck).
+const DUCK_FACTOR = 0.28;
+// Shuffle rotation window for the endless synth tracks, in ms.
+const SHUFFLE_MIN_MS = 90000, SHUFFLE_MAX_MS = 150000;
 
 export const AudioEngine = {
   ctx: null, masterGain: null, musicGain: null, sfxGain: null,
   enabled: localStorage.getItem('hp_sound') === 'on',
-  track: TRACK_ORDER.includes(localStorage.getItem('hp_track')) ? localStorage.getItem('hp_track') : 'theme',
+  track: SELECTABLE.includes(localStorage.getItem('hp_track')) ? localStorage.getItem('hp_track') : 'theme',
+  // The track actually playing right now. Differs from `track` only in shuffle
+  // mode; every playback path reads this, never `track`.
+  activeTrack: null,
+  _shuffleTimer: null,
+  // True only once audio is genuinely audible. `enabled` is the *setting*;
+  // autoplay policy means music can't start until the first user gesture, so
+  // the two diverge on a reload and the mute button reflects that.
+  musicPlaying: false,
+  _listeners: [],
   themeAudio: null, themeFailed: false,
   musicTimer: null, nextNoteTime: 0, step: 0,
   _pattern: null, _stepDur: 0.42, _droneFreq: 164.81, _droneEvery: 16, // scheduler override slot — duel uses this too
@@ -65,7 +83,7 @@ export const AudioEngine = {
   duckMusic() {
     this._duckDepth++;
     if (this._duckDepth > 1) return; // already ducked — don't restack
-    const factor = 0.28;
+    const factor = DUCK_FACTOR;
     if (this.musicGain && this.ctx) {
       this._duckSavedMusicGain = this.musicGain.gain.value;
       this.musicGain.gain.setTargetAtTime(this._duckSavedMusicGain * factor, this.ctx.currentTime, 0.15);
@@ -90,6 +108,55 @@ export const AudioEngine = {
     this._duckSavedThemeVol = null;
   },
 
+  // ─── shuffle ───────────────────────────────────────────────────────────────
+  // 'shuffle' is a selection, not a playable track. Resolve it to a real one,
+  // avoiding an immediate repeat (and theme when its MP3 has failed to load).
+  _resolveTrack() {
+    if (this.track !== 'shuffle') return this.track;
+    let pool = TRACK_ORDER.filter(t => t !== this.activeTrack);
+    if (this.themeFailed) pool = pool.filter(t => t !== 'theme');
+    if (!pool.length) pool = this.themeFailed ? TRACK_ORDER.filter(t => t !== 'theme') : TRACK_ORDER;
+    return pool[Math.floor(Math.random() * pool.length)];
+  },
+
+  _clearShuffleTimer() {
+    if (this._shuffleTimer) { clearTimeout(this._shuffleTimer); this._shuffleTimer = null; }
+  },
+
+  // Only the endless synth tracks need a timer — the theme MP3 rotates off its
+  // own 'ended' event instead, so its natural length is the rotation boundary.
+  // Always clears first, so this can never double-arm.
+  _armShuffleTimer() {
+    this._clearShuffleTimer();
+    if (this.track !== 'shuffle' || !this.enabled || this.duelActive) return;
+    if (this.activeTrack === 'theme') return;
+    const ms = SHUFFLE_MIN_MS + Math.random() * (SHUFFLE_MAX_MS - SHUFFLE_MIN_MS);
+    this._shuffleTimer = setTimeout(() => this._advanceShuffle(), ms);
+  },
+
+  _advanceShuffle() {
+    if (this.track !== 'shuffle' || !this.enabled || this.duelActive) return;
+    const from = this.activeTrack;
+    const next = this._resolveTrack();
+    this.activeTrack = next;
+    if (from === 'theme' && next !== 'theme') {
+      if (this.themeAudio) this.themeAudio.pause();
+      this.startAmbient();
+    } else if (next === 'theme') {
+      this.stopAmbient();
+      this.startTheme();
+    } else {
+      // synth → synth: the scheduler reads _pattern fresh each tick and every
+      // pattern is the same length, so swapping in place is seamless — no
+      // stop/start, no step reset.
+      this._applyTrackPattern(next);
+    }
+    this._armShuffleTimer();
+  },
+
+  onChange(fn) { this._listeners.push(fn); },
+  _notify() { this._listeners.forEach(f => { try { f(); } catch (e) { /* a bad listener shouldn't break audio */ } }); },
+
   toggle() {
     this.enabled = !this.enabled;
     localStorage.setItem('hp_sound', this.enabled ? 'on' : 'off');
@@ -101,6 +168,7 @@ export const AudioEngine = {
       if (this.duelActive) this._applyDuelPattern();
       else this.startMusic();
     } else {
+      this._clearShuffleTimer();
       if (this.duelActive) this.stopAmbient();
       else this.stopMusic();
     }
@@ -108,9 +176,22 @@ export const AudioEngine = {
   },
 
   switchTrack() {
-    const i = TRACK_ORDER.indexOf(this.track);
-    this.track = TRACK_ORDER[(i + 1) % TRACK_ORDER.length];
+    const i = SELECTABLE.indexOf(this.track);
+    let next = this.track;
+    // skip the theme entry entirely once its MP3 is known to be broken
+    for (let n = 1; n <= SELECTABLE.length; n++) {
+      const cand = SELECTABLE[(i + n) % SELECTABLE.length];
+      if (this.themeFailed && cand === 'theme') continue;
+      next = cand; break;
+    }
+    this.setTrack(next);
+  },
+
+  setTrack(next) {
+    if (!SELECTABLE.includes(next)) return;
+    this.track = next;
     localStorage.setItem('hp_track', this.track);
+    this._clearShuffleTimer();
     // don't let a track switch stomp an in-progress duel loop — the new
     // track choice simply takes effect once stopDuelMusic() restores normal playback.
     if (this.enabled && !this.duelActive) { this.stopMusic(); this.startMusic(); }
@@ -119,56 +200,92 @@ export const AudioEngine = {
 
   updateButtons() {
     const mBtn = document.getElementById('music-toggle');
-    mBtn.textContent = this.enabled ? '🔊' : '🔇';
-    mBtn.setAttribute('aria-pressed', String(this.enabled));
+    if (mBtn) {
+      mBtn.textContent = this.enabled ? '🔊' : '🔇';
+      mBtn.setAttribute('aria-pressed', String(this.enabled));
+      // Sound can be ON as a setting while nothing is audible yet, because
+      // autoplay policy holds playback until the first gesture. Say so rather
+      // than showing a 🔊 that's lying.
+      const pending = this.enabled && !this.musicPlaying;
+      mBtn.classList.toggle('pending', pending);
+      mBtn.title = !this.enabled ? 'Sound is off'
+        : pending ? 'Sound on — tap anywhere to start the music'
+        : 'Sound is on';
+    }
+    // #track-toggle was retired in favour of the settings panel's named list;
+    // guard so this keeps working whether or not the element exists.
     const tBtn = document.getElementById('track-toggle');
-    tBtn.classList.toggle('hidden', !this.enabled || (this.themeFailed && this.track === 'theme'));
-    tBtn.textContent = TRACK_LABELS[this.track] || '🎵 Theme';
+    if (tBtn) {
+      tBtn.classList.toggle('hidden', !this.enabled || (this.themeFailed && this.track === 'theme'));
+      tBtn.textContent = TRACK_LABELS[this.track] || '🎵 Theme';
+    }
+    this._notify();
   },
 
   // ── music ──
   startMusic() {
     if (!this.enabled) return;
-    if (this.track === 'theme' && !this.themeFailed) this.startTheme();
+    this.activeTrack = this._resolveTrack();
+    if (this.activeTrack === 'theme' && !this.themeFailed) this.startTheme();
     else this.startAmbient();
+    this._armShuffleTimer();
   },
 
   stopMusic() {
+    this._clearShuffleTimer();
     this.stopAmbient();
     if (this.themeAudio) this.themeAudio.pause();
+    this.musicPlaying = false;
   },
 
   startTheme() {
     if (!this.themeAudio) {
       this.themeAudio = new Audio('audio/hedwigs-theme.mp3');
-      this.themeAudio.loop = true;
       this.themeAudio.volume = this._volume * 0.5;
-      this.themeAudio.addEventListener('error', () => {
+      // Failure marks the track dead and falls back to the synth. It sets
+      // activeTrack, NOT track — clobbering `track` would silently discard the
+      // player's stored selection.
+      const onFail = () => {
         this.themeFailed = true;
-        this.track = 'ambient';
+        this.activeTrack = 'ambient';
+        this.musicPlaying = false;
         if (this.enabled) this.startAmbient();
         this.updateButtons();
+      };
+      this.themeAudio.addEventListener('error', onFail);
+      this.themeAudio._onFail = onFail;
+      // In shuffle mode the MP3 doesn't loop; its end is the rotation cue.
+      this.themeAudio.addEventListener('ended', () => {
+        if (this.track === 'shuffle' && this.enabled && !this.duelActive) this._advanceShuffle();
       });
     }
-    this.themeAudio.play().catch(() => {
-      this.themeFailed = true;
-      this.track = 'ambient';
-      if (this.enabled) this.startAmbient();
+    const shuffling = this.track === 'shuffle';
+    this.themeAudio.loop = !shuffling;
+    if (shuffling) this.themeAudio.currentTime = 0; // stopMusic() only pauses, so rewind
+    // match the current duck level, or a track swap mid-speech blares
+    this.themeAudio.volume = this._volume * 0.5 * (this._duckDepth > 0 ? DUCK_FACTOR : 1);
+    this.themeAudio.play().then(() => {
+      this.musicPlaying = true;
       this.updateButtons();
-    });
+    }).catch(() => this.themeAudio._onFail());
+  },
+
+  // Pattern/step-duration for a real track. Split out of startAmbient() so
+  // shuffle can swap synth patterns in place without restarting the scheduler.
+  _applyTrackPattern(track) {
+    const trackPatterns = { theme: AMBIENT_PATTERN, ambient: AMBIENT_PATTERN, common: COMMON_ROOM_PATTERN, hall: GREAT_HALL_PATTERN };
+    const trackStepDur = { common: 0.5, hall: 0.36 };
+    this._pattern = trackPatterns[track] || AMBIENT_PATTERN;
+    this._stepDur = trackStepDur[track] || 0.42;
+    this._droneFreq = 164.81;
+    this._droneEvery = 16;
   },
 
   startAmbient() {
     this.ensureRunning();
-    // Pattern/step-duration/drone are keyed off the current track selection —
-    // this always resets them, so a prior duel override never leaks into a
-    // normal track pick (stopDuelMusic() calls startMusic()/this, in order).
-    const trackPatterns = { theme: AMBIENT_PATTERN, ambient: AMBIENT_PATTERN, common: COMMON_ROOM_PATTERN, hall: GREAT_HALL_PATTERN };
-    const trackStepDur = { common: 0.5, hall: 0.36 };
-    this._pattern = trackPatterns[this.track] || AMBIENT_PATTERN;
-    this._stepDur = trackStepDur[this.track] || 0.42;
-    this._droneFreq = 164.81;
-    this._droneEvery = 16;
+    // Always resets pattern/step/drone, so a prior duel override never leaks
+    // into a normal track pick (stopDuelMusic() calls startMusic()/this, in order).
+    this._applyTrackPattern(this.activeTrack || this.track);
     this._startScheduler();
   },
 
@@ -189,10 +306,13 @@ export const AudioEngine = {
     this.step = 0;
     this.nextNoteTime = this.ctx.currentTime + 0.1;
     this.musicTimer = setInterval(() => this.scheduleAmbient(), 25);
+    this.musicPlaying = true;
+    this.updateButtons();
   },
 
   stopAmbient() {
     if (this.musicTimer) { clearInterval(this.musicTimer); this.musicTimer = null; }
+    if (!this.themeAudio || this.themeAudio.paused) this.musicPlaying = false;
   },
 
   scheduleAmbient() {
@@ -218,6 +338,7 @@ export const AudioEngine = {
   startDuelMusic() {
     if (!this.enabled) return;
     this.duelActive = true;
+    this._clearShuffleTimer(); // the duel owns the music until it's over
     const themeWasPlaying = !!(this.themeAudio && !this.themeAudio.paused);
     if (themeWasPlaying) this.themeAudio.pause();
     this.stopAmbient();
@@ -233,8 +354,13 @@ export const AudioEngine = {
     this._preDuel = null;
     if (this.musicGain) this.musicGain.gain.value = prev?.musicGain ?? 0.055;
     if (!this.enabled) return;
-    if (prev?.themeWasPlaying) this.startTheme();
-    else this.startMusic();
+    if (prev?.themeWasPlaying) {
+      this.activeTrack = 'theme';
+      this.startTheme();
+      this._armShuffleTimer(); // this branch skips startMusic(), so re-arm here
+    } else {
+      this.startMusic();
+    }
   },
 
   // music-box voice: sine + quiet octave partial, instant attack, long decay
@@ -453,8 +579,16 @@ export const DUEL_PATTERN = [
 ];
 
 export function initAudioListeners() {
-  // If sound was left on, start it on the first user interaction (autoplay policy).
-  document.addEventListener('click', () => {
-    if (AudioEngine.enabled) { AudioEngine.ensureRunning(); AudioEngine.startMusic(); }
-  }, { once: true });
+  // If sound was left on, start it on the first user interaction (autoplay
+  // policy). Listens for several gesture types — not just click — so a
+  // keyboard-only player gets music too. Whichever fires first removes the rest.
+  const EVENTS = ['pointerdown', 'keydown', 'touchstart'];
+  const unlock = () => {
+    EVENTS.forEach(e => document.removeEventListener(e, unlock));
+    if (!AudioEngine.enabled) return;
+    AudioEngine.ensureRunning();
+    AudioEngine.startMusic();
+    AudioEngine.updateButtons(); // clears the "tap to start" pending state
+  };
+  EVENTS.forEach(e => document.addEventListener(e, unlock));
 }

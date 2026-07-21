@@ -18,7 +18,7 @@ import {
 } from './quiz.js';
 import { Journey } from './journey.js';
 import { Nav } from './nav.js';
-import { initVoiceToggle, cancelSpeech, dismissCard } from './dialogue.js';
+import { cancelSpeech, dismissCard } from './dialogue.js';
 import { Arsenal } from './arsenal.js';
 import { composeRoundHooks } from './abilities.js';
 import { Cards } from './cards.js';
@@ -26,6 +26,7 @@ import { Daily } from './daily.js';
 import { Hedwig } from './hedwig.js';
 import { SPELLS } from './arsenal.js';
 import { Guide } from './guide.js';
+import { Settings } from './settings.js';
 
 // ─── FX / sky / cursor init (must run before other listeners use FX) ────────
 FX.init();
@@ -97,8 +98,9 @@ resultBtns[0].addEventListener('click', () => resultPrimary());
 resultBtns[1].addEventListener('click', () => resultSecondary());
 
 // ─── Sound controls ──────────────────────────────────────────────────────────
+// Only quick-mute stays in the corner; track/voice/volume live in the settings
+// panel, which adopts these elements at Settings.init().
 document.getElementById('music-toggle').addEventListener('click', () => AudioEngine.toggle());
-document.getElementById('track-toggle').addEventListener('click', () => AudioEngine.switchTrack());
 const volumeSlider = document.getElementById('volume-slider');
 volumeSlider.value = String(AudioEngine.getVolume());
 volumeSlider.addEventListener('input', (e) => AudioEngine.setVolume(parseFloat(e.target.value)));
@@ -138,4 +140,4 @@ Nav.setHomeCallback(() => {
   updateWelcomeScreen();
   Journey.refreshCTA();
 });
-initVoiceToggle();
+Settings.init(); // owns the voice, track, volume and motion controls
