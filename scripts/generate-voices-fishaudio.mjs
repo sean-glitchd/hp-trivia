@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // ─── generate-voices-fishaudio.mjs: character voices via Fish Audio ─────────
 // Same output contract as the other two generate-voices scripts
-// (audio/voices/<id>.m4a) so the app needs zero code changes. Used for Snape
-// and Nick — Hagrid/McGonagall/Dumbledore/Voldemort already run through the
-// ElevenLabs scripts on Sean's own accounts.
+// (audio/voices/<id>.m4a) so the app needs zero code changes. Used for Snape,
+// Nick, and Hagrid — McGonagall/Dumbledore/Voldemort still run through the
+// ElevenLabs script on Sean's own account.
 //
 // Requires FISHAUDIO_API_KEY in the environment (never hardcode it here).
 //   export FISHAUDIO_API_KEY=...
@@ -93,6 +93,7 @@ if (process.argv.includes('--sample')) {
 const CAST = {
   snape: process.env.FISHAUDIO_SNAPE_ID || '',
   nick: process.env.FISHAUDIO_NICK_ID || '',
+  hagrid: process.env.FISHAUDIO_HAGRID_ID || '',
 };
 
 // [id, character, spokenText] — name-free (see scripts/generate-voices.mjs
@@ -106,6 +107,21 @@ const LINES = [
 
   ['grade-a-nick', 'nick', 'Perfectly respectable. Not everyone can be top of the class — or keep their head.'],
   ['first-wrong-nick', 'nick', "Don't lose your head over one mistake — I speak from experience."],
+
+  ['grade-e-hagrid', 'hagrid', 'Knew yeh had it in yeh! Great one, that was!'],
+  ['grade-t-hagrid', 'hagrid', "Don' worry. Firs' tries never count. Have a rock cake an' go again."],
+  ['streak-3-hagrid', 'hagrid', 'Three in a row! Yer a natural, no mistake!'],
+  ['card-legendary-hagrid', 'hagrid', "Blimey — I haven't seen a card like that since I was a boy!"],
+  ['journey-intro-1', 'hagrid', "Blimey! Welcome ter Hogwarts. I'm Hagrid — I'll show yeh the ropes."],
+  ['journey-intro-2', 'hagrid', "Yeh're here ter learn. Each Year has a few lessons — ten questions apiece. Get six right an' yeh pass."],
+  ['journey-intro-3', 'hagrid', "Finish all a Year's lessons an' yeh can sit the Final Exam. Pass that, an' yeh move up a Year."],
+  ['journey-intro-4', 'hagrid', "Yeh'll earn spells along the way. Tap one ter see what it does, then tap again ter cast it — handy in a tight spot."],
+  ['journey-intro-5', 'hagrid', "Every answer earns House Points fer the House Cup. An' keep yer eyes peeled — the Golden Snitch an' Hedwig turn up now an' then. Catch 'em fer a reward!"],
+  ['journey-intro-6', 'hagrid', 'Right then. Off yeh go. Make us proud.'],
+  ['first-year-done-1', 'hagrid', "Yeh did it! A whole Year behind yeh. Onwards — it only gets more int'restin' from here."],
+  ['quick-intro-1', 'hagrid', "Oh, just after a quick round, are yeh? Ten questions, pick yer difficulty, an' off yeh go."],
+  ['quick-intro-2', 'hagrid', "Keep an eye out fer the Golden Snitch an' Hedwig — catch 'em fer a bonus spell charge or two."],
+  ['quick-intro-3', 'hagrid', "An' if yeh declare a House up top, yeh'll get their special perk fer this round. Go on then — good luck!"],
 ];
 
 mkdirSync(OUT_DIR, { recursive: true });
